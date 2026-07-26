@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Design & Distributed Systems Cheat Sheet</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>Ultimate System Design & Cloud Architecture Playbook</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,16 +12,10 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        darkbg: '#0f172a',
-                        cardbg: '#1e293b',
+                        byteblue: '#2563eb',
+                        bytebg: '#0b0f17',
+                        cardbg: '#111827',
+                        cardborder: '#1f2937',
                     }
                 }
             }
@@ -29,39 +23,47 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        .code-block { font-family: 'Fira Code', 'Courier New', monospace; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #0b0f17; }
+        .code-block, code, pre { font-family: 'JetBrains Mono', Courier, monospace; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-track { background: #0b0f17; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        .case-card { transition: all 0.2s ease-in-out; }
+        .case-card:hover { transform: translateY(-2px); }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="text-slate-100 min-h-screen flex flex-col antialiased">
 
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 lg:px-8 py-3">
+    <!-- Top Navigation Header (ByteByteGo / Alex Xu Style) -->
+    <header class="sticky top-0 z-50 bg-[#0b0f17]/90 backdrop-blur-md border-b border-gray-800 px-4 lg:px-8 py-3">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-xl">
-                    <i class="fa-solid fa-network-wired"></i>
+                <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2.5 rounded-xl text-white font-extrabold text-xl shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-diagram-project"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg text-white leading-tight">System Design Cheat Sheet</h1>
-                    <p class="text-xs text-slate-400">First-Principles Architecture, Deep Mechanics & Production Case Studies</p>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-lg text-white tracking-tight">System Design Engineering Playbook</h1>
+                        <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Alex Xu Grade v3.0</span>
+                    </div>
+                    <p class="text-xs text-slate-400">First-Principles Architecture, Multi-Cloud Mapping & High-Scale Case Studies</p>
                 </div>
             </div>
 
             <!-- Search Bar -->
             <div class="relative w-full md:w-96">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput" placeholder="Search algorithms, patterns, case studies... (e.g., LSM, Raft, XFetch)" 
-                    class="w-full pl-9 pr-4 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors">
+                <input type="text" id="searchInput" placeholder="Search algorithms, cloud mappings, case studies... (e.g. ScyllaDB, Spanner, H3, Kafka)" 
+                    class="w-full pl-9 pr-4 py-1.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
             </div>
 
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-                <span class="bg-slate-800 border border-slate-700 px-2 py-1 rounded">GitHub Pages Ready</span>
-                <span class="bg-blue-900/50 text-blue-300 border border-blue-700/50 px-2 py-1 rounded">v2.0 Advanced</span>
+            <div class="flex items-center gap-2 text-xs">
+                <a href="#cloud-matrix" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-cloud text-blue-400"></i> Cloud Matrix
+                </a>
+                <span class="bg-blue-600 text-white font-bold px-2.5 py-1.5 rounded-lg">GitHub Pages Ready</span>
             </div>
         </div>
     </header>
@@ -69,329 +71,496 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8 py-6 flex-grow w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
 
         <!-- Sidebar Navigation -->
-        <aside class="lg:col-span-1 space-y-2">
-            <div class="sticky top-20 bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 backdrop-blur">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-2 mb-2">Architectural Modules</h2>
-                <nav class="space-y-1" id="categoryNav">
-                    <button onclick="filterCategory('all')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white flex items-center gap-2">
-                        <i class="fa-solid fa-layer-group w-4 text-center"></i> All Topics
-                    </button>
-                    <button onclick="filterCategory('storage')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-database w-4 text-center text-amber-400"></i> Storage Engines
-                    </button>
-                    <button onclick="filterCategory('consistency')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-400"></i> Consistency & Consensus
-                    </button>
-                    <button onclick="filterCategory('caching')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-bolt w-4 text-center text-yellow-400"></i> Caching & Stampede
-                    </button>
-                    <button onclick="filterCategory('scaling')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-server w-4 text-center text-emerald-400"></i> Relational Scaling
-                    </button>
-                    <button onclick="filterCategory('streaming')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-location-dot w-4 text-center text-purple-400"></i> Messaging & Geospatial
-                    </button>
-                    <button onclick="filterCategory('case-studies')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-building w-4 text-center text-rose-400"></i> Production Case Studies
-                    </button>
-                    <button onclick="filterCategory('failure-matrix')" class="nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2">
-                        <i class="fa-solid fa-triangle-exclamation w-4 text-center text-red-400"></i> Production Failure Matrix
-                    </button>
-                </nav>
+        <aside class="lg:col-span-1 space-y-3">
+            <div class="sticky top-20 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 backdrop-blur space-y-4">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1 mb-2">Architectural Modules</h2>
+                    <nav class="space-y-1" id="categoryNav">
+                        <button onclick="filterCategory('all')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-blue-600 text-white flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group w-4 text-center"></i> All Modules</span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">8</span>
+                        </button>
+                        <button onclick="filterCategory('cloud-matrix')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-sun w-4 text-center text-sky-400"></i> Multi-Cloud Equivalence
+                        </button>
+                        <button onclick="filterCategory('storage')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-database w-4 text-center text-amber-400"></i> Storage Engine Internals
+                        </button>
+                        <button onclick="filterCategory('consistency')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-400"></i> Consistency & Consensus
+                        </button>
+                        <button onclick="filterCategory('caching')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt w-4 text-center text-yellow-400"></i> Resiliency & Thundering Herd
+                        </button>
+                        <button onclick="filterCategory('scaling')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-server w-4 text-center text-emerald-400"></i> RDBMS Scaling & Multiplexing
+                        </button>
+                        <button onclick="filterCategory('messaging')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-network-wired w-4 text-center text-purple-400"></i> Messaging & Geospatial
+                        </button>
+                        <button onclick="filterCategory('case-studies')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-building-columns w-4 text-center text-rose-400"></i> Production Case Studies
+                        </button>
+                        <button onclick="filterCategory('failure-matrix')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation w-4 text-center text-red-400"></i> Incident & Failure Matrix
+                        </button>
+                    </nav>
+                </div>
 
-                <div class="mt-6 pt-4 border-t border-slate-700/60 px-2">
-                    <p class="text-xs text-slate-400">Hosting Tip:</p>
-                    <p class="text-[11px] text-slate-500 mt-1 leading-snug">Push this <code>index.html</code> to a GitHub repository and enable <strong>GitHub Pages</strong> in Settings for instant free hosting.</p>
+                <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
+                    <div class="flex items-center gap-1.5 font-bold text-slate-300">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i> Alex Xu / ByteByteGo Standard
+                    </div>
+                    <p class="text-slate-400 leading-normal">
+                        Designed for principal engineers, cloud architects (AWS/GCP/Azure), and system design interview preparation.
+                    </p>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Cards Container -->
+        <!-- Main Content Area -->
         <main class="lg:col-span-3 space-y-6" id="cardsContainer">
 
-            <!-- Card 1: Storage Engines -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="storage" data-keywords="b-tree lsm tree rocksdb cassandra innodb compaction write amplification bloom filter">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i class="fa-solid fa-database"></i></span>
-                        <h2 class="text-lg font-bold text-white">1. Storage Mechanics: B-Trees vs. LSM Trees</h2>
+            <!-- MODULE 1: Cloud Provider Mapping Matrix -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" id="cloud-matrix" data-category="cloud-matrix" data-keywords="cloud matrix aws gcp azure equivalence provider mapping dynamodb bigtable cosmos spanner kafka aurora memorystore">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-cloud-sun text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">1. Multi-Cloud Technology Equivalence Matrix</h2>
+                            <p class="text-xs text-slate-400">Direct mapping across AWS, GCP, Azure, and Open Source infrastructure primitives</p>
+                        </div>
                     </div>
-                    <span class="text-xs bg-amber-900/40 text-amber-300 border border-amber-700/50 px-2.5 py-0.5 rounded-full font-semibold">Engine Primitives</span>
+                    <span class="text-xs bg-sky-500/10 text-sky-300 border border-sky-500/30 px-3 py-1 rounded-full font-bold">AWS vs GCP vs Azure</span>
                 </div>
 
-                <p class="text-sm text-slate-300">
-                    Storage engine design is defined by trade-offs between <strong>Write Amplification Factor (WAF)</strong>, <strong>Read Amplification Factor (RAF)</strong>, and <strong>Space Amplification Factor (SAF)</strong>.
-                </p>
-
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                    <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-900/80 text-slate-200 border-b border-slate-700">
-                                <th class="p-2.5 font-semibold">Dimension</th>
-                                <th class="p-2.5 font-semibold">B-Tree / B+Tree (Postgres, InnoDB)</th>
-                                <th class="p-2.5 font-semibold">LSM Tree (RocksDB, ScyllaDB, Cassandra)</th>
+                            <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
+                                <th class="p-3 font-semibold">Architectural Primitive</th>
+                                <th class="p-3 font-semibold text-amber-400"><i class="fa-brands fa-aws mr-1"></i> AWS</th>
+                                <th class="p-3 font-semibold text-blue-400"><i class="fa-brands fa-google mr-1"></i> GCP</th>
+                                <th class="p-3 font-semibold text-sky-400"><i class="fa-brands fa-microsoft mr-1"></i> Azure</th>
+                                <th class="p-3 font-semibold text-emerald-400"><i class="fa-solid fa-code-branch mr-1"></i> Open Source / Standard</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-700/60">
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
                             <tr>
-                                <td class="p-2.5 font-medium text-slate-200">Write Pattern</td>
-                                <td class="p-2.5">In-place random disk page updates (16KB pages). Uses WAL.</td>
-                                <td class="p-2.5 text-emerald-400 font-medium">Sequential I/O. Appends to RAM MemTable, flushes SSTables.</td>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">Relational DB (Serverless / Managed)</td>
+                                <td class="p-3">Amazon Aurora</td>
+                                <td class="p-3">Cloud SQL / AlloyDB</td>
+                                <td class="p-3">Azure SQL Database</td>
+                                <td class="p-3 text-slate-400">PostgreSQL / MySQL</td>
                             </tr>
                             <tr>
-                                <td class="p-2.5 font-medium text-slate-200">Read Overhead</td>
-                                <td class="p-2.5 text-emerald-400 font-medium">Fast O(log N). Predictable point lookups.</td>
-                                <td class="p-2.5">Slower. Checks MemTable & multiple SSTable levels (needs Bloom Filters).</td>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">Global Distributed SQL (Spanner-like)</td>
+                                <td class="p-3">Aurora Global Database</td>
+                                <td class="p-3 text-blue-300 font-semibold">Cloud Spanner</td>
+                                <td class="p-3">Cosmos DB (PostgreSQL API)</td>
+                                <td class="p-3 text-slate-400">CockroachDB / YugabyteDB</td>
                             </tr>
                             <tr>
-                                <td class="p-2.5 font-medium text-slate-200">Compaction / Maintenance</td>
-                                <td class="p-2.5">Minimal maintenance (vacuuming, page split cleanup).</td>
-                                <td class="p-2.5 text-rose-400">High background Compaction I/O (Leveled or Size-Tiered).</td>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">NoSQL Key-Value / Wide-Column</td>
+                                <td class="p-3 text-amber-300 font-semibold">Amazon DynamoDB</td>
+                                <td class="p-3 text-blue-300 font-semibold">Cloud Bigtable</td>
+                                <td class="p-3 text-sky-300 font-semibold">Azure Cosmos DB</td>
+                                <td class="p-3 text-slate-400">Cassandra / ScyllaDB</td>
                             </tr>
                             <tr>
-                                <td class="p-2.5 font-medium text-slate-200">Write Amplification</td>
-                                <td class="p-2.5 text-rose-400">High (updating 10 bytes re-writes entire 16KB page).</td>
-                                <td class="p-2.5 text-amber-300">Low initially, but grows during deep level compactions.</td>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">In-Memory Cache</td>
+                                <td class="p-3">Amazon ElastiCache</td>
+                                <td class="p-3">Cloud Memorystore</td>
+                                <td class="p-3">Azure Cache for Redis</td>
+                                <td class="p-3 text-slate-400">Redis / KeyDB / Memcached</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">Event Streaming Log</td>
+                                <td class="p-3">Amazon MSK / Kinesis</td>
+                                <td class="p-3 text-blue-300 font-semibold">Cloud Pub/Sub</td>
+                                <td class="p-3">Azure Event Hubs</td>
+                                <td class="p-3 text-slate-400">Apache Kafka / Redpanda</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">Message Task Queue</td>
+                                <td class="p-3">Amazon SQS</td>
+                                <td class="p-3">Pub/Sub (Queue mode) / Tasks</td>
+                                <td class="p-3">Azure Service Bus / Queue</td>
+                                <td class="p-3 text-slate-400">RabbitMQ / Celery</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">Object Storage</td>
+                                <td class="p-3">Amazon S3</td>
+                                <td class="p-3">Google Cloud Storage</td>
+                                <td class="p-3">Azure Blob Storage</td>
+                                <td class="p-3 text-slate-400">MinIO / Ceph</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-white bg-slate-950/40">API Gateway & Edge Routing</td>
+                                <td class="p-3">Amazon API Gateway</td>
+                                <td class="p-3">Apigee / Cloud Endpoints</td>
+                                <td class="p-3">Azure API Management</td>
+                                <td class="p-3 text-slate-400">Kong / Envoy / Traefik</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <div class="bg-slate-900/90 rounded-lg p-3 border border-slate-700/50 text-xs space-y-1">
-                    <div class="font-bold text-amber-400"><i class="fa-solid fa-lightbulb mr-1"></i> Key Formula: Bloom Filter False Positive Rate</div>
-                    <div class="code-block text-slate-300">$p \approx \left(1 - e^{-kn/m}\right)^k$ where $m$ = bits, $n$ = keys, $k$ = hash functions. Bloom filters prevent disk reads on negative lookups.</div>
-                </div>
             </section>
 
-            <!-- Card 2: Consistency & Consensus -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="consistency" data-keywords="cap pacelc quorum raft paxos true time spanner atomic clock consistency">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-scale-balanced"></i></span>
-                        <h2 class="text-lg font-bold text-white">2. Distributed Consistency: PACELC & Quorum Math</h2>
+            <!-- MODULE 2: Storage Engines & Internal Mechanics -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="storage" data-keywords="b-tree lsm tree rocksdb cassandra innodb compaction write amplification bloom filter waf raf saf">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-database text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">2. Storage Engine Mechanics: B-Trees vs. LSM Trees</h2>
+                            <p class="text-xs text-slate-400">Page updates in-place vs. append-only MemTable & SSTable flush cycles</p>
+                        </div>
                     </div>
-                    <span class="text-xs bg-blue-900/40 text-blue-300 border border-blue-700/50 px-2.5 py-0.5 rounded-full font-semibold">Distributed Mechanics</span>
-                </div>
-
-                <p class="text-sm text-slate-300">
-                    While CAP governs behavior during network partitions (<span class="text-blue-400 font-semibold">P</span>), <strong>PACELC</strong> governs normal execution (<span class="text-emerald-400 font-semibold">E</span>): <em>If Partition (P), choose Availability (A) or Consistency (C); Else (E), choose Latency (L) or Consistency (C).</em>
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div class="bg-slate-900/80 border border-blue-500/30 rounded-lg p-3">
-                        <div class="font-bold text-blue-400 mb-1">PC / EC Systems</div>
-                        <p class="text-slate-300">Prefers Consistency under partition AND under normal operation.</p>
-                        <div class="mt-2 text-slate-400 font-mono">Examples: Spanner, CockroachDB</div>
-                    </div>
-                    <div class="bg-slate-900/80 border border-amber-500/30 rounded-lg p-3">
-                        <div class="font-bold text-amber-400 mb-1">PA / EL Systems</div>
-                        <p class="text-slate-300">Prefers Availability under partition and Low Latency normally.</p>
-                        <div class="mt-2 text-slate-400 font-mono">Examples: Cassandra, DynamoDB</div>
-                    </div>
-                    <div class="bg-slate-900/80 border border-emerald-500/30 rounded-lg p-3">
-                        <div class="font-bold text-emerald-400 mb-1">PC / EL Systems</div>
-                        <p class="text-slate-300">Prefers Consistency under partition, but Low Latency normally.</p>
-                        <div class="mt-2 text-slate-400 font-mono">Examples: MongoDB (Primary Read)</div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/90 rounded-lg p-3 border border-slate-700/50 text-xs space-y-1">
-                    <div class="font-bold text-blue-400"><i class="fa-solid fa-calculator mr-1"></i> Quorum Consistency Equation</div>
-                    <p class="text-slate-300">Strong Consistency is guaranteed when Write Quorum ($W$) + Read Quorum ($R$) > Replication Factor ($N$).</p>
-                    <div class="code-block text-emerald-400 mt-1">W + R > N  ==>  Overlapping node guarantees reading the latest vector clock / timestamp.</div>
-                </div>
-            </section>
-
-            <!-- Card 3: Caching & Stampede Defense -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="caching" data-keywords="cache stampede thundering herd xfetch request coalescing singleflight redis rate limiter token bucket">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-yellow-500/10 text-yellow-400 rounded-lg"><i class="fa-solid fa-bolt"></i></span>
-                        <h2 class="text-lg font-bold text-white">3. Resiliency: Cache Stampede & Single-Flight Defense</h2>
-                    </div>
-                    <span class="text-xs bg-yellow-900/40 text-yellow-300 border border-yellow-700/50 px-2.5 py-0.5 rounded-full font-semibold">High Concurrency</span>
-                </div>
-
-                <p class="text-sm text-slate-300">
-                    A <strong>Cache Stampede (Thundering Herd)</strong> occurs when a high-QPS key expires, causing thousands of concurrent worker threads to hit the primary SQL database simultaneously in the same millisecond.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-700/70">
-                        <h3 class="font-bold text-yellow-400 text-xs uppercase tracking-wider mb-2">1. Single-Flight Request Coalescing</h3>
-                        <p class="text-xs text-slate-300 leading-relaxed">
-                            Intermediary proxy layer catches 10,000 identical incoming requests, issues <strong>only 1 query</strong> to the DB/Cache, and broadcasts the returned result buffer to all 10,000 callers in memory.
-                        </p>
-                    </div>
-
-                    <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-700/70">
-                        <h3 class="font-bold text-yellow-400 text-xs uppercase tracking-wider mb-2">2. XFetch Probabilistic Early Expiration</h3>
-                        <p class="text-xs text-slate-300 leading-relaxed">
-                            Probabilistically triggers a background refresh <em>before</em> the cache key dies based on request frequency and remaining TTL.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/90 rounded-lg p-3 border border-slate-700/50 text-xs">
-                    <div class="font-bold text-yellow-400 mb-1"><i class="fa-solid fa-square-root-variable mr-1"></i> XFetch Algorithm Formula</div>
-                    <div class="code-block text-slate-200">Recompute if:  -β * δ * ln(random()) > TTL - now</div>
-                    <p class="text-slate-400 text-[11px] mt-1">Where β > 0 is a constant multiplier and δ is the delta compute duration in milliseconds.</p>
-                </div>
-            </section>
-
-            <!-- Card 4: Relational Scaling -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="scaling" data-keywords="vitess mysql thread starvation postgres pgbouncer proxy grpc context switching connection pool">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i class="fa-solid fa-server"></i></span>
-                        <h2 class="text-lg font-bold text-white">4. Relational Database Scaling & Connection Management</h2>
-                    </div>
-                    <span class="text-xs bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2.5 py-0.5 rounded-full font-semibold">Scale Primitives</span>
-                </div>
-
-                <p class="text-sm text-slate-300">
-                    Databases like MySQL allocate a dedicated process/thread per connection. When 10,000 application workers connect directly, memory explodes ($10,000 	imes 	ext{stack buffer}$) and CPU context-switching causes thread starvation.
-                </p>
-
-                <div class="bg-slate-900/90 p-4 rounded-lg border border-slate-700/60 space-y-2">
-                    <div class="text-xs font-bold text-emerald-400 flex items-center justify-between">
-                        <span>Vitess Middleware Pattern (YouTube & Slack)</span>
-                        <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded">gRPC Connection Multiplexing</span>
-                    </div>
-                    <p class="text-xs text-slate-300">
-                        App servers talk standard SQL to <strong>VTGate</strong> proxies. VTGate pools and multiplexes 50,000+ incoming app connections down to a tight, persistent pool of gRPC connections managed by <strong>VTTablet</strong> alongside MySQL.
-                    </p>
-                </div>
-            </section>
-
-            <!-- Card 5: Messaging & Geospatial -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="streaming" data-keywords="kafka rabbitmq sqs geohash quadtree uber h3 commit log pubsub geospatial">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><i class="fa-solid fa-location-dot"></i></span>
-                        <h2 class="text-lg font-bold text-white">5. Messaging Logs vs. Task Queues & Geospatial Indexing</h2>
-                    </div>
-                    <span class="text-xs bg-purple-900/40 text-purple-300 border border-purple-700/50 px-2.5 py-0.5 rounded-full font-semibold">Event Infrastructure</span>
+                    <span class="text-xs bg-amber-500/10 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full font-bold">Data Engine Primitives</span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-700">
-                        <div class="font-bold text-purple-400 mb-1">Task Queues (RabbitMQ, SQS)</div>
-                        <ul class="list-disc list-inside space-y-1 text-slate-300">
-                            <li><strong>Destructive Consumer:</strong> Messages deleted post-ack.</li>
-                            <li><strong>Non-Replayable:</strong> Cannot rewind state history.</li>
-                            <li><strong>Worker Pool:</strong> Competing consumers process arbitrary tasks.</li>
-                        </ul>
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-sm">B-Tree / B+Tree (InnoDB, Postgres)</span>
+                            <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">In-Place Updates</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            Organizes data into fixed 8KB–16KB disk pages. Reads require $O(\log N)$ point page lookups. Writes modify pages in-place, creating page splits and high random I/O.
+                        </p>
+                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
+                            <strong>Amplification:</strong> Low Read Amplification ($RAF$), High Write Amplification ($WAF$).
+                        </div>
                     </div>
 
-                    <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-700">
-                        <div class="font-bold text-purple-400 mb-1">Commit Logs (Kafka, Cloud Pub/Sub)</div>
-                        <ul class="list-disc list-inside space-y-1 text-slate-300">
-                            <li><strong>Immutable Record:</strong> Retained by time/size log policy.</li>
-                            <li><strong>Replayable:</strong> Consumer offset pointers can be rewound.</li>
-                            <li><strong>Ordered:</strong> Strict FIFO order per partition key.</li>
-                        </ul>
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-emerald-400 text-sm">LSM-Tree (RocksDB, ScyllaDB, Cassandra)</span>
+                            <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">Sequential Append</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            Appends writes sequentially to an in-memory <strong>MemTable</strong> and Write-Ahead Log (WAL). Flushes MemTables to disk as immutable <strong>SSTables</strong>.
+                        </p>
+                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
+                            <strong>Amplification:</strong> Low $WAF$ initially, but background <em>Compaction</em> uses disk I/O to merge keys and purge tombstones.
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-900/90 p-3.5 rounded-lg border border-slate-700 text-xs space-y-2">
-                    <div class="font-bold text-purple-300">Geospatial Partitioning: Uber H3 vs. Geohash</div>
-                    <p class="text-slate-300">
-                        2D spatial proximity does not map linearly to a 1D scalar B-Tree. <strong>Uber H3</strong> projects hexagonal grid cells onto the globe across 16 resolution levels. Hexagons guarantee equal distances to all 6 adjacent neighbors, eliminating the directional diagonal distortion inherent in square Geohash grids.
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                    <div class="font-bold text-amber-300 flex items-center justify-between">
+                        <span><i class="fa-solid fa-filter mr-1"></i> Bloom Filter False Positive Rate Formula</span>
+                        <span class="font-mono text-[10px] text-slate-400">Probabilistic Data Structure</span>
+                    </div>
+                    <div class="code-block text-emerald-400">p ≈ (1 - e^(-kn/m))^k</div>
+                    <p class="text-slate-300 text-[11px] leading-relaxed">
+                        Where $m$ = bit array size, $n$ = element count, and $k$ = hash functions. Bloom filters prevent LSM reads from checking disk SSTables if a key is absent, eliminating wasted disk I/O.
                     </p>
                 </div>
             </section>
 
-            <!-- Card 6: Production Case Studies -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="case-studies" data-keywords="discord scylladb slack vitess spanner google case study architecture production">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-rose-500/10 text-rose-400 rounded-lg"><i class="fa-solid fa-building"></i></span>
-                        <h2 class="text-lg font-bold text-white">6. High-Scale Production Case Studies</h2>
+            <!-- MODULE 3: Distributed Consistency & Consensus -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="consistency" data-keywords="cap pacelc quorum raft paxos true time spanner atomic clock consistency vector clock">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20"><i class="fa-solid fa-scale-balanced text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">3. Distributed Consistency: PACELC & Quorum Math</h2>
+                            <p class="text-xs text-slate-400">Evaluating partition tradeoffs (CAP) and normal operating latencies (PACELC)</p>
+                        </div>
                     </div>
-                    <span class="text-xs bg-rose-900/40 text-rose-300 border border-rose-700/50 px-2.5 py-0.5 rounded-full font-semibold">Real-World Engineering</span>
+                    <span class="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full font-bold">Consensus Primitives</span>
                 </div>
 
-                <div class="space-y-3 text-xs">
-                    <!-- Case Study 1 -->
-                    <div class="bg-slate-900/90 p-3.5 rounded-lg border-l-4 border-l-sky-500 border-t border-r border-b border-slate-700/70">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-sky-400 text-sm">Discord: Trillion-Message Storage Engine</span>
-                            <span class="text-[10px] text-slate-400">ScyllaDB + Rust</span>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-xs">
+                    <div class="font-bold text-blue-400 text-sm">The PACELC Theorem Breakdown</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="text-amber-400 font-bold block mb-1">If Partition (P): Choose A or C</span>
+                            <p class="text-slate-300">Under network split, system either serves stale data on local nodes (<span class="text-amber-300 font-semibold">Availability</span>) or blocks reads/writes until resolved (<span class="text-blue-300 font-semibold">Consistency</span>).</p>
                         </div>
-                        <p class="text-slate-300 mt-1">
-                            Replaced 177 Cassandra nodes with 72 ScyllaDB nodes (C++ shard-per-core) to eliminate JVM stop-the-world Garbage Collection pauses. Added a Rust proxy layer performing <strong>Single-Flight Request Coalescing</strong> to drop P99 latency from 125ms to 15ms.
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="text-emerald-400 font-bold block mb-1">Else (E): Choose L or C</span>
+                            <p class="text-slate-300">Under normal operations, system either confirms writes asynchronously for speed (<span class="text-emerald-300 font-semibold">Latency</span>) or waits for multi-node consensus (<span class="text-blue-300 font-semibold">Consistency</span>).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                    <div class="font-bold text-blue-300"><i class="fa-solid fa-calculator mr-1"></i> Quorum Math Equation</div>
+                    <p class="text-slate-300">
+                        Strong linearizable consistency is mathematically guaranteed when Write Quorum ($W$) plus Read Quorum ($R$) strictly exceeds Replication Factor ($N$):
+                    </p>
+                    <div class="code-block text-blue-400 text-sm">W + R > N</div>
+                    <p class="text-slate-400 text-[11px]">
+                        Guarantee: The write set and read set must overlap by at least one node containing the latest vector clock or monotonic timestamp.
+                    </p>
+                </div>
+            </section>
+
+            <!-- MODULE 4: Resiliency, Caching & Thundering Herd -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="caching" data-keywords="cache stampede thundering herd xfetch request coalescing singleflight redis rate limiter token bucket">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-yellow-500/10 text-yellow-400 rounded-xl border border-yellow-500/20"><i class="fa-solid fa-bolt text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">4. Resiliency & High-Concurrency Shielding</h2>
+                            <p class="text-xs text-slate-400">Preventing database outages caused by cache stampedes and thundering herds</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 px-3 py-1 rounded-full font-bold">Thundering Herd Defense</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="font-bold text-yellow-400 text-sm">1. Single-Flight Request Coalescing</div>
+                        <p class="text-slate-300 leading-relaxed">
+                            An intermediary proxy layer (e.g. Go `golang.org/x/sync/singleflight` or Rust proxy) catches thousands of concurrent read requests for the same missing cache key. It issues <strong>only 1 query</strong> to the DB and broadcasts the response to all waiting callers.
                         </p>
                     </div>
 
-                    <!-- Case Study 2 -->
-                    <div class="bg-slate-900/90 p-3.5 rounded-lg border-l-4 border-l-emerald-500 border-t border-r border-b border-slate-700/70">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-emerald-400 text-sm">Slack: Scaling MySQL with Vitess</span>
-                            <span class="text-[10px] text-slate-400">Vitess + gRPC</span>
-                        </div>
-                        <p class="text-slate-300 mt-1">
-                            Migrated monolithic MySQL sharded manually by <code>team_id</code> to Vitess. Abstracted sharding behind VTGate SQL proxies, enabling zero-downtime resharding of 100k+ user enterprise workspaces by <code>(channel_id, user_id)</code>.
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="font-bold text-yellow-400 text-sm">2. XFetch Probabilistic Early Expiration</div>
+                        <p class="text-slate-300 leading-relaxed">
+                            Instead of waiting for a key to die ($TTL = 0$), read workers randomly trigger a background re-computation early as expiration approaches, scaled by compute delta ($\delta$) and request frequency.
                         </p>
                     </div>
+                </div>
 
-                    <!-- Case Study 3 -->
-                    <div class="bg-slate-900/90 p-3.5 rounded-lg border-l-4 border-l-blue-500 border-t border-r border-b border-slate-700/70">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-blue-400 text-sm">Google Cloud Spanner: Global Serializability</span>
-                            <span class="text-[10px] text-slate-400">Atomic Clocks + Paxos</span>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs font-mono text-yellow-300">
+                    XFetch Formula:  -β * δ * ln(random()) > TTL - now
+                </div>
+            </section>
+
+            <!-- MODULE 5: Relational Database Scaling & Multiplexing -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="scaling" data-keywords="vitess mysql thread starvation postgres pgbouncer proxy grpc context switching connection pool">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20"><i class="fa-solid fa-server text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">5. Relational Scaling & Connection Multiplexing</h2>
+                            <p class="text-xs text-slate-400">Solving OS thread stack memory explosion and CPU context-switching starvation</p>
                         </div>
-                        <p class="text-slate-300 mt-1">
-                            Combined TrueTime atomic clock hardware ($\epsilon \le 1	ext{ms}$ drift bounds) with Commit-Wait rules and Multi-Paxos consensus to achieve externally consistent multi-region serializability without locking global reads.
-                        </p>
+                    </div>
+                    <span class="text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full font-bold">Relational Scale</span>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-emerald-400 text-sm">The OS Thread Starvation Bottleneck</div>
+                    <p class="text-slate-300 leading-relaxed">
+                        Relational databases allocate a dedicated OS process/thread per connection. When 10,000 application workers open direct TCP connections, RAM is exhausted ($10,000 	imes 	ext{thread stack buffer}$) and CPU context-switching degrades query execution to zero throughput.
+                    </p>
+                    <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-slate-300">
+                        <strong class="text-emerald-300">Solution (Vitess Proxy Architecture):</strong> VTGate proxies intercept standard SQL, multiplexing 50,000+ app connections down to a small, persistent pool of gRPC connections managed by VTTablet instances next to MySQL nodes.
                     </div>
                 </div>
             </section>
 
-            <!-- Card 7: Production Failure Matrix -->
-            <section class="card-item bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-lg space-y-4" data-category="failure-matrix" data-keywords="failure matrix symptom root cause mitigation outage troubleshooting P99 latency">
-                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="p-2 bg-red-500/10 text-red-400 rounded-lg"><i class="fa-solid fa-triangle-exclamation"></i></span>
-                        <h2 class="text-lg font-bold text-white">7. Production Failure & Incident Mitigation Matrix</h2>
+            <!-- MODULE 6: Asynchronous Streaming & Geospatial Architecture -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="messaging" data-keywords="kafka rabbitmq sqs geohash quadtree uber h3 commit log pubsub geospatial">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20"><i class="fa-solid fa-network-wired text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">6. Event Streams & Geospatial Partitioning</h2>
+                            <p class="text-xs text-slate-400">Append-only commit logs vs. task queues, and Uber H3 hexagonal indexing</p>
+                        </div>
                     </div>
-                    <span class="text-xs bg-red-900/40 text-red-300 border border-red-700/50 px-2.5 py-0.5 rounded-full font-semibold">Troubleshooting</span>
+                    <span class="text-xs bg-purple-500/10 text-purple-300 border border-purple-500/30 px-3 py-1 rounded-full font-bold">Event Infrastructure</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-purple-400 text-sm block">Task Queues (RabbitMQ, SQS)</span>
+                        <p class="text-slate-300">
+                            Destructive consumption pattern. Messages are removed once acknowledged by a worker. Non-replayable state.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-purple-400 text-sm block">Commit Logs (Kafka, Pub/Sub)</span>
+                        <p class="text-slate-300">
+                            Immutable append-only disk log. Independent consumer groups track offset pointers. Replayable history.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                    <div class="font-bold text-purple-300">Geospatial Scaling: Uber H3 Hexagonal Grid</div>
+                    <p class="text-slate-300 leading-relaxed">
+                        Traditional 2D lat/long queries break B-Tree indexes. Square grids (Geohash) suffer from diagonal distortion (corners are $\sqrt{2}	imes$ further than edges). <strong>Uber H3</strong> partitions the globe into 16 resolution levels of hexagons, where all 6 adjacent neighbors share identical center-point distances.
+                    </p>
+                </div>
+            </section>
+
+            <!-- MODULE 7: Comprehensive Case Studies (Alex Xu / ByteByteGo Grade) -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="case-studies" data-keywords="discord slack google spanner uber netflix whatsapp stripe twitter youtube case study architecture bytebytego alex xu">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20"><i class="fa-solid fa-building-columns text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">7. Production Case Studies (ByteByteGo Grade)</h2>
+                            <p class="text-xs text-slate-400">Deep breakdowns of real engineering transformations in top tech infrastructure</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-rose-500/10 text-rose-300 border border-rose-500/30 px-3 py-1 rounded-full font-bold">7 High-Scale Case Studies</span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 text-xs">
+
+                    <!-- Case Study 1: Discord -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-sky-400 text-sm flex items-center gap-2">
+                                <i class="fa-brands fa-discord"></i> Discord: Trillion-Message Storage Migration
+                            </span>
+                            <span class="text-[10px] bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-mono">ScyllaDB + Rust</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> 177 Cassandra nodes hit JVM Garbage Collection pauses (2–5s) during <code>@everyone</code> read storms, causing false node eviction and cascading cluster failures.<br>
+                            <strong>Solution:</strong> Migrated to ScyllaDB (C++ shard-per-core engine) eliminating JVM GC. Placed a stateful Rust proxy performing <em>Single-Flight Request Coalescing</em> in front of database nodes.
+                        </p>
+                        <div class="flex items-center gap-4 text-[11px] text-slate-400 font-mono pt-1">
+                            <span class="text-emerald-400">177 → 72 Nodes</span>
+                            <span class="text-emerald-400">P99 Latency: 125ms → 15ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Case Study 2: Slack -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-emerald-400 text-sm flex items-center gap-2">
+                                <i class="fa-brands fa-slack"></i> Slack: Horizontal MySQL Scaling with Vitess
+                            </span>
+                            <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-mono">Vitess + gRPC</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> Workspace manual sharding by <code>team_id</code> broke when enterprise customers joined with 100k+ employees on a single database node.<br>
+                            <strong>Solution:</strong> Deployed Vitess. VTGate proxies multiplex incoming web connections over gRPC to VTTablet, enabling live background resharding by <code>(channel_id, user_id)</code> with zero customer downtime.
+                        </p>
+                    </div>
+
+                    <!-- Case Study 3: Netflix -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-red-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> Netflix: Global Adaptive Streaming & Open Connect
+                            </span>
+                            <span class="text-[10px] bg-red-950 text-red-300 border border-red-800 px-2 py-0.5 rounded font-mono">Open Connect CDN + AWS</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> Serving 15%+ of global internet traffic directly from cloud data centers would saturate transit ISPs.<br>
+                            <strong>Solution:</strong> Control plane runs on AWS (user auth, recommendations). Media assets are pre-positioned during off-peak hours onto custom hardware appliances (Open Connect CDN) embedded directly inside IXPs and ISP networks globally.
+                        </p>
+                    </div>
+
+                    <!-- Case Study 4: Uber -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-taxi"></i> Uber: Real-Time Geospatial Driver Dispatch
+                            </span>
+                            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-mono">Uber H3 + Ringpop</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> Matching millions of drivers to riders every 4 seconds required sub-millisecond 2D spatial lookups.<br>
+                            <strong>Solution:</strong> Partitioned the earth using <strong>H3 Hexagonal Spatial Indexing</strong>. Used Ringpop (consistent hashing with gossip protocol) to route driver location updates to the exact node responsible for that H3 hex cell in RAM.
+                        </p>
+                    </div>
+
+                    <!-- Case Study 5: Google Cloud Spanner -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-blue-400 text-sm flex items-center gap-2">
+                                <i class="fa-brands fa-google"></i> Google Cloud Spanner: Global Serializability
+                            </span>
+                            <span class="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded font-mono">TrueTime Atomic Clocks + Paxos</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> Achieving globally serializable multi-region transactions without locking database reads worldwide.<br>
+                            <strong>Solution:</strong> Deployed GPS receivers + Atomic Clocks into data centers (TrueTime API) to bound clock uncertainty ($\epsilon \le 1	ext{ms}$). Enforced a Commit-Wait rule ($2\epsilon$) so cross-continent reads require zero lock overhead.
+                        </p>
+                    </div>
+
+                    <!-- Case Study 6: WhatsApp / Meta -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-emerald-400 text-sm flex items-center gap-2">
+                                <i class="fa-brands fa-whatsapp"></i> WhatsApp: 2B Users with Minimal Server Footprint
+                            </span>
+                            <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-mono">Erlang BEAM + FreeBSD</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> Maintaining persistent TCP connections for 2 billion active users simultaneously.<br>
+                            <strong>Solution:</strong> Built on Erlang OTP runtime. Erlang lightweight processes consume only ~2KB of RAM per connection (vs. ~1MB OS threads), allowing single servers to hold 2 million+ concurrent open WebSocket/TCP connections.
+                        </p>
+                    </div>
+
+                    <!-- Case Study 7: Stripe -->
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-indigo-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-credit-card"></i> Stripe: Idempotent Payment Processing Engine
+                            </span>
+                            <span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-mono">Idempotency Keys + Redis Lock</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>Problem:</strong> Preventing double-charging customers during network retries or gateway timeouts.<br>
+                            <strong>Solution:</strong> Enforces mandatory <code>Idempotency-Key</code> HTTP headers. An API Gateway acquiring a Redis distributed lock checks if the transaction execution payload exists in an immutable log before forwarding requests downstream.
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- MODULE 8: Production Incident & Failure Matrix -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="failure-matrix" data-keywords="failure matrix symptom root cause mitigation outage troubleshooting P99 latency">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">8. Incident & Failure Mitigation Matrix</h2>
+                            <p class="text-xs text-slate-400">Quick-reference lookup for high-scale production incidents and mitigations</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-red-500/10 text-red-300 border border-red-500/30 px-3 py-1 rounded-full font-bold">Troubleshooting Reference</span>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                    <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-900/90 text-slate-200 border-b border-slate-700">
-                                <th class="p-2.5 font-semibold">System Symptom</th>
-                                <th class="p-2.5 font-semibold">Root Cause</th>
-                                <th class="p-2.5 font-semibold">Immediate Mitigation</th>
-                                <th class="p-2.5 font-semibold">Long-Term Architecture</th>
+                            <tr class="bg-slate-950 text-slate-200 border-b border-slate-800">
+                                <th class="p-3 font-semibold">Incident Symptom</th>
+                                <th class="p-3 font-semibold">Root Cause</th>
+                                <th class="p-3 font-semibold">Immediate Mitigation</th>
+                                <th class="p-3 font-semibold">Strategic Long-Term Fix</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-700/60">
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
                             <tr>
-                                <td class="p-2.5 font-medium text-rose-400">Database CPU 100% on TTL Expiry</td>
-                                <td class="p-2.5">Cache Stampede / Thundering Herd</td>
-                                <td class="p-2.5">Single-Flight request proxy or mutex lock</td>
-                                <td class="p-2.5">Implement XFetch probabilistic early expiration</td>
+                                <td class="p-3 font-medium text-rose-400">100% DB CPU on TTL Expiry</td>
+                                <td class="p-3">Cache Stampede / Thundering Herd</td>
+                                <td class="p-3">Single-Flight request proxy or mutex lock</td>
+                                <td class="p-3">XFetch probabilistic early expiration</td>
                             </tr>
                             <tr>
-                                <td class="p-2.5 font-medium text-rose-400">Unpredictable P99 Latency Spikes (>3s)</td>
-                                <td class="p-2.5">JVM Stop-the-World Garbage Collection</td>
-                                <td class="p-2.5">Adjust GC heap parameters & compaction I/O</td>
-                                <td class="p-2.5">Migrate to C++/Rust engine (ScyllaDB/RocksDB)</td>
+                                <td class="p-3 font-medium text-rose-400">Unpredictable P99 Spikes (>3s)</td>
+                                <td class="p-3">JVM Stop-the-World GC pauses</td>
+                                <td class="p-3">Isolate compaction I/O; tune GC heap</td>
+                                <td class="p-3">Migrate to C++/Rust engine (ScyllaDB)</td>
                             </tr>
                             <tr>
-                                <td class="p-2.5 font-medium text-rose-400">MySQL Connection Drops</td>
-                                <td class="p-2.5">Thread context switching starvation</td>
-                                <td class="p-2.5">Deploy connection pooler (ProxySQL / PgBouncer)</td>
-                                <td class="p-2.5">Migrate to Vitess with gRPC connection multiplexing</td>
+                                <td class="p-3 font-medium text-rose-400">Relational DB Connection Drops</td>
+                                <td class="p-3">OS thread context-switching starvation</td>
+                                <td class="p-3">Deploy PgBouncer / ProxySQL pooler</td>
+                                <td class="p-3">Deploy Vitess gRPC multiplexing middleware</td>
                             </tr>
                             <tr>
-                                <td class="p-2.5 font-medium text-rose-400">Uneven Shard Memory Utilization</td>
-                                <td class="p-2.5">Hot Partition Key (Celebrity Problem)</td>
-                                <td class="p-2.5">Salt partition keys: <code>key_user_hash%N</code></td>
-                                <td class="p-2.5">Consistent Hashing with Virtual Nodes</td>
+                                <td class="p-3 font-medium text-rose-400">Uneven Node Memory / Disk</td>
+                                <td class="p-3">Hot Partition Key (Celebrity Problem)</td>
+                                <td class="p-3">Salt partition keys: <code>key_hash%N</code></td>
+                                <td class="p-3">Consistent Hashing with Virtual Nodes</td>
                             </tr>
                         </tbody>
                     </table>
@@ -402,11 +571,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500 mt-8">
-        <p>Designed for GitHub Pages Hosting • Free, Open Source, and Lightweight</p>
+    <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500 mt-12">
+        <p>System Design Engineering Playbook • Designed for Free Hosting on GitHub Pages</p>
     </footer>
 
-    <!-- Interactive Filtering JS -->
+    <!-- Interactive Search & Filtering Script -->
     <script>
         const searchInput = document.getElementById('searchInput');
         const cards = document.querySelectorAll('.card-item');
@@ -414,7 +583,6 @@
 
         let currentCategory = 'all';
 
-        // Filter by Search Query
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             cards.forEach(card => {
@@ -433,20 +601,17 @@
             });
         });
 
-        // Filter by Category Button
         function filterCategory(category) {
             currentCategory = category;
 
-            // Update UI Button Styles
             navButtons.forEach(btn => {
                 if (btn.getAttribute('onclick').includes(category)) {
-                    btn.className = 'nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white flex items-center gap-2';
+                    btn.className = 'nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-blue-600 text-white flex items-center justify-between';
                 } else {
-                    btn.className = 'nav-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700/50 flex items-center gap-2';
+                    btn.className = 'nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2';
                 }
             });
 
-            // Trigger Search logic with current query
             searchInput.dispatchEvent(new Event('input'));
         }
     </script>
