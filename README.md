@@ -7,7 +7,7 @@ This repository contains a standalone, zero-dependency `index.html` file pre-con
 
 The playbook is live at [https://alvincangou.github.io/system-design-cheat-sheet/](https://alvincangou.github.io/system-design-cheat-sheet/)!
 
-## 📌 What's Included (15 Modules)
+## 📌 What's Included (16 Modules)
 
 ### 1. ☁️ Multi-Cloud Equivalence Matrix (AWS vs GCP vs Azure vs Open Source)
 Direct component mapping across **Amazon Web Services**, **Google Cloud Platform**, **Microsoft Azure**, and **Open Source** primitives:
@@ -91,6 +91,16 @@ Click any case study to open a **deep-dive drawer** with Mermaid architecture di
 ### 15. 🚨 Incident & Failure Mitigation Matrix
 Quick-reference table: Symptom → Root Cause → Immediate Mitigation → Strategic Long-Term Fix
 * Cache Stampede, JVM GC Pauses, Thread Starvation, Hot Partitions, Schema Evolution Failures, Data Loss
+
+### 16. 🛤️ On-Premise to Cloud Migration Paradigms
+Comprehensive coverage of enterprise migration patterns and cloud-native transformations:
+* **Architectural Shifts:** Batch-Scheduled → Event-Driven (EDA), Monolithic/VMs → Serverless & Microservices
+* **Security & Identity:** Perimeter Security → Zero Trust, Hardcoded Secrets → Dynamic Key Management (Secrets Manager, KMS, Key Vault)
+* **State Management:** Local Config → Externalized Configuration (Parameter Store, AppConfig), Stateful Disks → Ephemeral Compute + Object Storage
+* **Deployment & Observability:** Manual Deployments → Immutable Infrastructure (IaC) with Blue/Green & Canary, Siloed Logs → Distributed Tracing (X-Ray, Cloud Trace, App Insights)
+* **Migration Execution:** Big Bang Cutover → Strangler Fig Pattern, Manual SQL Dumps → Zero-Downtime CDC (Debezium, AWS DMS)
+* **Enterprise Realities:** The "6 Rs" Framework (Rehost, Replatform, Refactor, Repurchase, Retire, Retain), Data Gravity & Petabyte Transfer (Snowball, Transfer Appliance, Data Box), Dedicated Network Interconnects (Direct Connect, Cloud Interconnect, ExpressRoute), Governance & Landing Zones (Control Tower, Resource Folders, Management Groups)
+* **Comprehensive Translation Matrix:** 11-row mapping of on-premise concepts to AWS/GCP/Azure cloud-native equivalents
 
 ## ✨ Interactive Features
 * **🔍 Search & Filter:** Real-time text search across all modules with category filtering
