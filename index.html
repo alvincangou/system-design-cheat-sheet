@@ -172,7 +172,7 @@
                     <nav class="space-y-1" id="categoryNav">
                         <button onclick="filterCategory('all')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-blue-600 text-white flex items-center justify-between">
                             <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group w-4 text-center"></i> All Modules</span>
-                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full" id="totalModulesCount">16</span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full" id="totalModulesCount">19</span>
                         </button>
                         <button onclick="filterCategory('cloud-matrix')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-cloud-sun w-4 text-center text-sky-400"></i> Multi-Cloud Equivalence
@@ -219,6 +219,15 @@
                         <button onclick="filterCategory('migration')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-route w-4 text-center text-indigo-400"></i> Cloud Migration Patterns
                         </button>
+                        <button onclick="filterCategory('k8s')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-dharmachakra w-4 text-center text-sky-400"></i> Kubernetes & Service Mesh
+                        </button>
+                        <button onclick="filterCategory('gitops')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-infinity w-4 text-center text-teal-400"></i> GitOps & CI/CD Strategies
+                        </button>
+                        <button onclick="filterCategory('ai-ml')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-brain w-4 text-center text-rose-400"></i> AI/ML & Vector Databases
+                        </button>
                         <button onclick="filterCategory('case-studies')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-building-columns w-4 text-center text-rose-400"></i> Production Case Studies
                         </button>
@@ -234,7 +243,7 @@
                         <span class="font-bold text-slate-300 flex items-center gap-1.5">
                             <i class="fa-solid fa-circle-check text-emerald-400"></i> Study Progress
                         </span>
-                        <span class="text-slate-400" id="progressText">0 / 15</span>
+                        <span class="text-slate-400" id="progressText">0 / 19</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-bar-fill" id="progressFill"></div>
@@ -1155,6 +1164,94 @@
                 </div>
             </section>
 
+            <!-- MODULE 17: Container Orchestration & Service Meshes (Kubernetes) -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="k8s" data-keywords="kubernetes k8s control plane etcd kubelet service mesh envoy sidecar mtls istio" data-module="16">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-dharmachakra text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">17. Container Orchestration & Service Meshes (Kubernetes)</h2>
+                            <p class="text-xs text-slate-400">Control plane architecture, worker node internals, and sidecar mTLS communication</p>
+                        </div>
+                    </div>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(16)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-sky-400 text-sm block"><i class="fa-solid fa-server mr-1"></i> Control Plane vs. Worker Nodes</span>
+                        <p class="text-slate-300 leading-relaxed"><strong>Control Plane:</strong> Manages cluster state using the <em>API Server</em>, <em>Scheduler</em>, <em>Controller Manager</em>, and <em>etcd</em> (consistent key-value store using Raft consensus).<br>
+                        <strong>Worker Nodes:</strong> Run applications via the <em>Kubelet</em> (node agent), <em>Kube-proxy</em> (network routing), and container runtime (containerd).</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-sky-400 text-sm block"><i class="fa-solid fa-network-wired mr-1"></i> The Service Mesh & Sidecar Pattern</span>
+                        <p class="text-slate-300 leading-relaxed"><strong>Problem:</strong> Managing security, retries, and observability across hundreds of microservices manually in application code leads to code bloat and drift.<br>
+                        <strong>Solution:</strong> Injecting an Envoy proxy as a <em>Sidecar container</em> into every Pod. All inbound/outbound traffic flows through the proxy, enabling transparent mTLS encryption, rate limiting, and distributed tracing.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 18: Modern CI/CD, GitOps & Deployment Strategies -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="gitops" data-keywords="gitops argocd flux canary blue green shadow traffic deployment strategy" data-module="17">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20"><i class="fa-solid fa-infinity text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">18. Modern CI/CD, GitOps & Advanced Deployments</h2>
+                            <p class="text-xs text-slate-400">Declarative reconciliation engines and zero-downtime release topologies</p>
+                        </div>
+                    </div>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(17)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-teal-400 text-sm block"><i class="fa-solid fa-code-commit mr-1"></i> GitOps (ArgoCD / Flux)</span>
+                        <p class="text-slate-300 leading-relaxed">Git serves as the single source of truth for infrastructure and application state. An agent running in the cluster continuously pulls declarative manifests from Git, automatically reconciling any drift between actual cluster state and desired git state.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-teal-400 text-sm block"><i class="fa-solid fa-shuffle mr-1"></i> Advanced Deployment Topologies</span>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1">
+                            <li><strong class="text-amber-300">Blue/Green:</strong> Two identical production environments. Switch L7 router instantly. Zero downtime, easy rollback.</li>
+                            <li><strong class="text-emerald-300">Canary:</strong> Route 5% of production traffic to v2. Monitor error rates before ramping to 100%.</li>
+                            <li><strong class="text-violet-300">Shadow Traffic:</strong> Duplicate real user requests asynchronously to a test environment to gauge performance under true production load without affecting users.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 19: AI/ML Infrastructure, RAG & Vector Databases -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="ai-ml" data-keywords="ai ml rag vector database embedding hnsw pgvector pinecone milvus llm retrieval augmented generation" data-module="18">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20"><i class="fa-solid fa-brain text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">19. AI/ML Infrastructure, RAG & Vector Databases</h2>
+                            <p class="text-xs text-slate-400">Retrieval-Augmented Generation pipelines and high-dimensional vector similarity indexing</p>
+                        </div>
+                    </div>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(18)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-rose-400 text-sm block"><i class="fa-solid fa-database mr-1"></i> RAG Architecture Pipeline</span>
+                        <p class="text-slate-300 leading-relaxed"><strong>Problem:</strong> LLMs suffer from hallucinations and lack context on private corporate data.<br>
+                        <strong>Solution:</strong> <em>Retrieval-Augmented Generation (RAG).</em> Documents are chunked, converted into dense vectors via an embedding model, and stored in a vector database. When a user queries the LLM, the system performs a vector similarity search to find relevant document chunks and injects them directly into the LLM prompt context window.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-rose-400 text-sm block"><i class="fa-solid fa-chart-line mr-1"></i> Vector Indexing (HNSW & Quantization)</span>
+                        <p class="text-slate-300 leading-relaxed">Traditional B-Trees cannot search high-dimensional spaces (e.g., 1536-dimensional float vectors). Vector DBs (Pinecone, Milvus, Qdrant, pgvector) use <strong>HNSW (Hierarchical Navigable Small World)</strong> graphs or Product Quantization (PQ) to perform Approximate Nearest Neighbor (ANN) searches in sub-millisecond timeframes.</p>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -1381,7 +1478,10 @@
             'Architecture Anti-Patterns',
             'Case Studies',
             'Failure Matrix',
-            'Cloud Migration Patterns'
+            'Cloud Migration Patterns',
+            'Kubernetes & Service Mesh',
+            'GitOps & CI/CD Strategies',
+            'AI/ML & Vector Databases'
         ];
 
         function getStudyState() {
