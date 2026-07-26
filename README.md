@@ -5,12 +5,8 @@ An interactive, first-principles cheat sheet covering distributed systems mechan
 ## 🚀 Hosted Live on GitHub Pages
 This repository contains a standalone, zero-dependency `index.html` file pre-configured for instant free hosting on GitHub Pages.
 
-### How to Deploy Your Own Copy in 2 Minutes:
-1. Create a new repository on GitHub named `system-design-cheat-sheet`.
-2. Upload the `index.html` and `README.md` files from this repository.
-3. Go to **Settings** -> **Pages** in your GitHub repository.
-4. Under **Source**, select `main` (or `master`) branch and `/ (root)`, then click **Save**.
-5. Your cheat sheet will be live at `https://<your-username>.github.io/system-design-cheat-sheet/`!
+
+cheat sheet will be live at `https://<your-username>.github.io/system-design-cheat-sheet/`!
 
 ## 📌 Features Included
 * **Real-time Search & Filter:** Instant keyboard search across all algorithms and patterns.
