@@ -6,7 +6,7 @@ An interactive, first-principles cheat sheet covering distributed systems mechan
 This repository contains a standalone, zero-dependency `index.html` file pre-configured for instant free hosting on GitHub Pages.
 
 
-cheat sheet will be live at `https://<your-username>.github.io/system-design-cheat-sheet/`!
+cheat sheet is live at [https://alvincangou.github.io/system-design-cheat-sheet/](https://alvincangou.github.io/system-design-cheat-sheet/) !
 
 ## 📌 Features Included
 * **Real-time Search & Filter:** Instant keyboard search across all algorithms and patterns.
