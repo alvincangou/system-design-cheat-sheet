@@ -172,7 +172,7 @@
                     <nav class="space-y-1" id="categoryNav">
                         <button onclick="filterCategory('all')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-blue-600 text-white flex items-center justify-between">
                             <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group w-4 text-center"></i> All Modules</span>
-                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full" id="totalModulesCount">15</span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full" id="totalModulesCount">16</span>
                         </button>
                         <button onclick="filterCategory('cloud-matrix')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-cloud-sun w-4 text-center text-sky-400"></i> Multi-Cloud Equivalence
@@ -215,6 +215,9 @@
                         </button>
                         <button onclick="filterCategory('anti-patterns')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-triangle-exclamation w-4 text-center text-amber-500"></i> Architecture Anti-Patterns & Traps
+                        </button>
+                        <button onclick="filterCategory('migration')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-route w-4 text-center text-indigo-400"></i> Cloud Migration Patterns
                         </button>
                         <button onclick="filterCategory('case-studies')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-building-columns w-4 text-center text-rose-400"></i> Production Case Studies
@@ -992,6 +995,166 @@
                 </div>
             </section>
 
+            <!-- MODULE 16: On-Premise to Cloud Migration Paradigms -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="migration" data-keywords="migration on premise cloud native serverless event driven strangler fig cdc active active spot zero trust iac observability" data-module="15">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20"><i class="fa-solid fa-route text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">16. On-Premise to Cloud Migration Paradigms</h2>
+                            <p class="text-xs text-slate-400">Architectural shifts, security patterns, state management, and legacy modernization</p>
+                        </div>
+                    </div>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(15)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
+                </div>
+
+                <!-- 1. Architectural Paradigm Shifts -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-indigo-300 text-sm border-b border-slate-800 pb-2"><i class="fa-solid fa-cubes mr-1"></i> 1. Architectural Paradigm Shifts</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Batch-Scheduled → Event-Driven (EDA)</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Relying on CRON jobs or enterprise schedulers (e.g., Control-M) to run massive batch processes nightly. This leads to idle compute during the day and bottlenecks at night.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Event-Driven Architecture. Systems react to state changes in real-time. Instead of a nightly batch job processing 10,000 uploaded files, a storage event triggers a stateless function the millisecond a single file lands. Dramatically reduces latency, flattens compute spikes, and decoupling services prevents cascading failures.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> EventBridge, Lambda | <strong>GCP:</strong> Eventarc, Cloud Functions | <strong>Azure:</strong> Event Grid</div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Monolithic/VMs → Serverless & Microservices</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Heavy, stateful monolithic applications running on persistent Virtual Machines. Scaling requires buying and racking new servers.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Serverless & Microservices. Breaking the monolith into independent, stateless functions or containerized services. <strong>Advantages:</strong> Cost Reduction (TCO) via scale-to-zero capabilities (stop paying for idle CPU/RAM) and Operational Offloading (cloud provider manages OS patching, runtime, and HA).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Security & Identity Patterns -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-indigo-300 text-sm border-b border-slate-800 pb-2"><i class="fa-solid fa-shield-halved mr-1"></i> 2. Security & Identity Patterns</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Perimeter Security → Zero Trust Architecture</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> A "castle-and-moat" approach using rigid physical firewalls, DMZs, and VPNs. Once inside the network, lateral movement is highly trusted.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Zero Trust & Identity and Access Management (IAM). Never trust, always verify. Every service, function, and user must authenticate and be authorized via granular, least-privilege IAM roles, regardless of network location.</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Hardcoded Secrets → Dynamic Key Management</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Storing database passwords, API keys, and certificates in local text files, environment variables, or hardcoded directly in the application.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Centralized Secret Management. Injecting credentials dynamically at runtime using secure, auditable, and auto-rotating vaults.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> Secrets Manager, KMS | <strong>GCP:</strong> Secret Manager | <strong>Azure:</strong> Key Vault</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. State & Application Properties Management -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-indigo-300 text-sm border-b border-slate-800 pb-2"><i class="fa-solid fa-sliders mr-1"></i> 3. State & Application Properties Management</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Local Config → Externalized Configuration</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Configuration settings (.ini, .xml, .json) live on the local disk of the server. Updating a property requires a full application redeploy or server restart.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Dynamic Configuration Stores. Externalizing application properties to a centralized store. Services poll or listen to this store to update feature flags or configurations in real-time without restarting.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> Parameter Store, AppConfig | <strong>GCP:</strong> Firebase Remote Config | <strong>Azure:</strong> App Configuration</div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Stateful Disks → Ephemeral Compute + Object Storage</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Applications write user uploads or session states to the local filesystem (Block Storage). If the server dies, the data dies.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Compute instances are treated as ephemeral (cattle, not pets). All persistent state is pushed out to managed databases, distributed caches (Redis), or Object Storage (S3/GCS/Blob).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Modern Deployment & Observability -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-indigo-300 text-sm border-b border-slate-800 pb-2"><i class="fa-solid fa-code-merge mr-1"></i> 4. Modern Deployment & Observability</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Manual Deployments → Immutable Infrastructure (IaC)</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> SSHing into servers to manually run deployment scripts or tweak configurations ("Configuration Drift").</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Infrastructure as Code (IaC). Defining all infrastructure in code (Terraform, Pulumi). It enables advanced, zero-downtime deployment strategies like Blue/Green Deployments (routing traffic to a new isolated environment) and Canary Releases (routing 5% of traffic to the new version to test for errors).</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Siloed Logs → Distributed Observability</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Grepping through local log files on individual servers or using heavy agent-based monitoring.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Distributed Tracing & Centralized Logging. Because a single user request might hit 15 different microservices across multiple availability zones, correlation IDs are injected into headers to trace the entire lifecycle of a request.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> X-Ray, CloudWatch | <strong>GCP:</strong> Cloud Trace, Cloud Logging | <strong>Azure:</strong> App Insights, Azure Monitor</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 5. Advanced Migration Strategies (Strangler & CDC) -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-indigo-300 text-sm border-b border-slate-800 pb-2"><i class="fa-solid fa-route mr-1"></i> 5. Advanced Database & Migration Execution</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Big Bang Cutover → Strangler Fig Pattern</span>
+                            <p class="text-slate-300 leading-relaxed">Deploy an API Gateway in front of the monolith. Gradually route endpoints (e.g., 5% of traffic) to new microservices until the legacy system is "strangled" and safely decommissioned. Prevents catastrophic rollback failures common in weekend maintenance windows.</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Manual SQL Dumps → Zero-Downtime CDC</span>
+                            <p class="text-slate-300 leading-relaxed">Use Change Data Capture (Debezium, AWS DMS) to read the on-premise Write-Ahead Log (WAL) and replicate row-level changes to the cloud DB in real-time. Once caught up, switch application pointers with zero downtime instead of using SFTP `mysqldump` transfers.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Enterprise Migration Realities & Data Gravity -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3 mt-4">
+                    <div class="font-bold text-indigo-300 text-sm border-b border-slate-800 pb-2"><i class="fa-solid fa-building mr-1"></i> 6. Enterprise Migration Realities & Governance</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">The "6 Rs" Migration Framework</span>
+                            <p class="text-slate-400 leading-relaxed">Enterprise migrations fall into a spectrum. <strong class="text-slate-300">Rehost</strong> (Lift-and-Shift VMs, fast but high TCO). <strong class="text-slate-300">Replatform</strong> (Lift, tinker, and shift; e.g., moving local MySQL to managed RDS). <strong class="text-slate-300">Refactor</strong> (Re-architecting to serverless/microservices, slow but highest ROI). The others are Repurchase (SaaS), Retire, and Retain.</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Data Gravity & Petabyte Transfer</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Problem:</strong> Moving 50 Petabytes of unstructured NAS data over a 10Gbps connection takes months and saturates bandwidth.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Solution:</strong> Physical transfer appliances shipped to your data center, loaded locally, and trucked back to the cloud provider to bypass the network entirely.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> Snowball / Snowmobile | <strong>GCP:</strong> Transfer Appliance | <strong>Azure:</strong> Data Box</div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Dedicated Network Interconnects</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Standard IPsec VPNs traverse the unpredictable public internet.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Dedicated, private fiber-optic connections physically linking your on-premise router directly to the cloud provider's edge. Ensures consistent throughput, lower latency, and strict regulatory compliance.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> Direct Connect | <strong>GCP:</strong> Cloud Interconnect | <strong>Azure:</strong> ExpressRoute</div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="font-bold text-slate-200 block">Governance & Blast Radius (Landing Zones)</span>
+                            <p class="text-slate-400 leading-relaxed"><strong>Legacy:</strong> Workloads isolated by physical servers or complex VLANs.</p>
+                            <p class="text-slate-300 leading-relaxed"><strong>Cloud-Native:</strong> Automated "Landing Zones." Instead of putting everything in one cloud account, workloads are logically isolated across hundreds of separate accounts (OUs) to contain security blast radiuses and simplify billing.</p>
+                            <div class="text-[10px] bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-400 mt-1"><strong>AWS:</strong> Control Tower | <strong>GCP:</strong> Folder / Project Hierarchy | <strong>Azure:</strong> Management Groups</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Comprehensive Translation Matrix -->
+                <div class="overflow-x-auto mt-4">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
+                                <th class="p-3 font-semibold">On-Premise / Legacy Concept</th>
+                                <th class="p-3 font-semibold text-amber-400"><i class="fa-brands fa-aws mr-1"></i> AWS</th>
+                                <th class="p-3 font-semibold text-blue-400"><i class="fa-brands fa-google mr-1"></i> GCP</th>
+                                <th class="p-3 font-semibold text-sky-400"><i class="fa-brands fa-microsoft mr-1"></i> Azure</th>
+                                <th class="p-3 font-semibold text-emerald-400"><i class="fa-solid fa-code-branch mr-1"></i> Modern Architecture Pattern</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Cron Jobs / Batch Scripts</td><td class="p-3">EventBridge / Step Functions</td><td class="p-3">Cloud Scheduler / Workflows</td><td class="p-3">Logic Apps</td><td class="p-3 text-slate-400">Event-Driven / Orchestration</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Hardware Load Balancer (F5)</td><td class="p-3">Application Load Balancer (ALB)</td><td class="p-3">Cloud Load Balancing</td><td class="p-3">Azure Front Door / App Gateway</td><td class="p-3 text-slate-400">Elastic L7 Routing</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Local File System / NAS</td><td class="p-3">Amazon S3 / EFS</td><td class="p-3">Cloud Storage / Filestore</td><td class="p-3">Blob Storage / Azure Files</td><td class="p-3 text-slate-400">Ephemeral Compute + Object Store</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Local .env / Config Files</td><td class="p-3">Parameter Store / AppConfig</td><td class="p-3">Runtime Configurator</td><td class="p-3">App Configuration</td><td class="p-3 text-slate-400">Externalized Dynamic Config</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Hardcoded API Keys</td><td class="p-3">Secrets Manager / KMS</td><td class="p-3">Secret Manager</td><td class="p-3">Key Vault</td><td class="p-3 text-slate-400">Dynamic Secrets & Zero Trust</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Active Directory (On-Prem)</td><td class="p-3">AWS IAM / Identity Center</td><td class="p-3">Cloud IAM / Workforce Identity</td><td class="p-3">Entra ID (Azure AD)</td><td class="p-3 text-slate-400">Identity as the New Perimeter</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Grepping Local Logs</td><td class="p-3">CloudWatch + X-Ray</td><td class="p-3">Cloud Logging + Trace</td><td class="p-3">Azure Monitor + App Insights</td><td class="p-3 text-slate-400">Distributed Tracing & Telemetry</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Manual SQL Backups & Dumps</td><td class="p-3">AWS DMS</td><td class="p-3">Database Migration Service</td><td class="p-3">Azure Data Migration</td><td class="p-3 text-slate-400">CDC / Zero-Downtime Sync</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">50PB+ NAS Data Transfer</td><td class="p-3">AWS Snowball / Snowmobile</td><td class="p-3">Transfer Appliance</td><td class="p-3">Azure Data Box</td><td class="p-3 text-slate-400">Physical Data Transfer</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Public Internet VPNs</td><td class="p-3">AWS Direct Connect</td><td class="p-3">Cloud Interconnect</td><td class="p-3">ExpressRoute</td><td class="p-3 text-slate-400">Dedicated Private Fiber</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">VLAN Isolation</td><td class="p-3">AWS Control Tower</td><td class="p-3">Resource Folders</td><td class="p-3">Management Groups</td><td class="p-3 text-slate-400">Multi-Account Landing Zone</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -1217,7 +1380,8 @@
             'Rate Limiting & LB',
             'Architecture Anti-Patterns',
             'Case Studies',
-            'Failure Matrix'
+            'Failure Matrix',
+            'Cloud Migration Patterns'
         ];
 
         function getStudyState() {
