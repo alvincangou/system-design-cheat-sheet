@@ -32,9 +32,103 @@
         ::-webkit-scrollbar-thumb:hover { background: #374151; }
         .case-card { transition: all 0.2s ease-in-out; }
         .case-card:hover { transform: translateY(-2px); }
+
+        /* Deep-dive drawer styles */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .drawer-overlay.active { opacity: 1; pointer-events: all; }
+        .drawer-panel {
+            position: fixed;
+            top: 0;
+            right: -640px;
+            width: 100%;
+            max-width: 640px;
+            height: 100vh;
+            background: #0f172a;
+            border-left: 1px solid #1e293b;
+            z-index: 101;
+            overflow-y: auto;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 2rem;
+            box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+        }
+        .drawer-panel.open { right: 0; }
+        .drawer-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #1e293b;
+            border: none;
+            color: #94a3b8;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .drawer-close:hover { background: #334155; color: #fff; }
+
+        /* Study progress bar */
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background: #1e293b;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #2563eb, #8b5cf6);
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Animation for cards */
+        .card-item {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        /* Mermaid diagram container */
+        .mermaid-container {
+            background: #0b0f17;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #1e293b;
+            overflow-x: auto;
+        }
+        .mermaid-container svg { max-width: 100%; height: auto; }
+
+        /* Toggle card */
+        .toggle-card { cursor: pointer; user-select: none; }
+        .toggle-card .toggle-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .toggle-card.active .toggle-content { max-height: 800px; }
+        .toggle-card .toggle-icon { transition: transform 0.3s ease; }
+        .toggle-card.active .toggle-icon { transform: rotate(180deg); }
+
+        /* Study checkbox styling */
+        .study-checkbox input[type="checkbox"] { cursor: pointer; }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Drawer Overlay -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <!-- Drawer Panel -->
+    <div class="drawer-panel" id="drawerPanel">
+        <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div id="drawerContent" class="text-sm space-y-4"></div>
+    </div>
 
     <!-- Top Navigation Header (ByteByteGo / Alex Xu Style) -->
     <header class="sticky top-0 z-50 bg-[#0b0f17]/90 backdrop-blur-md border-b border-gray-800 px-4 lg:px-8 py-3">
@@ -46,7 +140,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-extrabold text-lg text-white tracking-tight">System Design Engineering Playbook</h1>
-                        <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Alex Xu Grade v3.0</span>
+                        <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">DDIA Grade v4.0</span>
                     </div>
                     <p class="text-xs text-slate-400">First-Principles Architecture, Multi-Cloud Mapping & High-Scale Case Studies</p>
                 </div>
@@ -78,16 +172,31 @@
                     <nav class="space-y-1" id="categoryNav">
                         <button onclick="filterCategory('all')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-blue-600 text-white flex items-center justify-between">
                             <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group w-4 text-center"></i> All Modules</span>
-                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">8</span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full" id="totalModulesCount">15</span>
                         </button>
                         <button onclick="filterCategory('cloud-matrix')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-cloud-sun w-4 text-center text-sky-400"></i> Multi-Cloud Equivalence
+                        </button>
+                        <button onclick="filterCategory('ddia')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-book-open w-4 text-center text-indigo-400"></i> DDIA Core Mechanics
+                        </button>
+                        <button onclick="filterCategory('estimations')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator w-4 text-center text-teal-400"></i> Scale Math & Estimations
                         </button>
                         <button onclick="filterCategory('storage')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-database w-4 text-center text-amber-400"></i> Storage Engine Internals
                         </button>
                         <button onclick="filterCategory('consistency')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-400"></i> Consistency & Consensus
+                        </button>
+                        <button onclick="filterCategory('encoding')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-code w-4 text-center text-violet-400"></i> Schema Evolution & Encoding
+                        </button>
+                        <button onclick="filterCategory('replication')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-spin w-4 text-center text-cyan-400"></i> Replication & CRDTs
+                        </button>
+                        <button onclick="filterCategory('transactions')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-shield w-4 text-center text-rose-400"></i> Transactions & Isolation
                         </button>
                         <button onclick="filterCategory('caching')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-bolt w-4 text-center text-yellow-400"></i> Resiliency & Thundering Herd
@@ -98,6 +207,15 @@
                         <button onclick="filterCategory('messaging')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-network-wired w-4 text-center text-purple-400"></i> Messaging & Geospatial
                         </button>
+                        <button onclick="filterCategory('streaming')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-trend-up w-4 text-center text-orange-400"></i> Batch & Stream Processing
+                        </button>
+                        <button onclick="filterCategory('rate-limiting')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-gauge-high w-4 text-center text-lime-400"></i> Rate Limiting & Load Balancing
+                        </button>
+                        <button onclick="filterCategory('anti-patterns')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation w-4 text-center text-amber-500"></i> Architecture Anti-Patterns & Traps
+                        </button>
                         <button onclick="filterCategory('case-studies')" class="nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-building-columns w-4 text-center text-rose-400"></i> Production Case Studies
                         </button>
@@ -105,6 +223,20 @@
                             <i class="fa-solid fa-triangle-exclamation w-4 text-center text-red-400"></i> Incident & Failure Matrix
                         </button>
                     </nav>
+                </div>
+
+                <!-- Study Progress Tracker -->
+                <div class="pt-3 border-t border-slate-800 text-[11px] space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-400"></i> Study Progress
+                        </span>
+                        <span class="text-slate-400" id="progressText">0 / 15</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    <div id="studyChecklist" class="space-y-1 max-h-60 overflow-y-auto text-[11px] text-slate-400"></div>
                 </div>
 
                 <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
@@ -122,7 +254,7 @@
         <main class="lg:col-span-3 space-y-6" id="cardsContainer">
 
             <!-- MODULE 1: Cloud Provider Mapping Matrix -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" id="cloud-matrix" data-category="cloud-matrix" data-keywords="cloud matrix aws gcp azure equivalence provider mapping dynamodb bigtable cosmos spanner kafka aurora memorystore">
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" id="cloud-matrix" data-category="cloud-matrix" data-keywords="cloud matrix aws gcp azure equivalence provider mapping dynamodb bigtable cosmos spanner kafka aurora memorystore" data-module="0">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20"><i class="fa-solid fa-cloud-sun text-lg"></i></div>
@@ -131,7 +263,12 @@
                             <p class="text-xs text-slate-400">Direct mapping across AWS, GCP, Azure, and Open Source infrastructure primitives</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-sky-500/10 text-sky-300 border border-sky-500/30 px-3 py-1 rounded-full font-bold">AWS vs GCP vs Azure</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs bg-sky-500/10 text-sky-300 border border-sky-500/30 px-3 py-1 rounded-full font-bold">AWS vs GCP vs Azure</span>
+                        <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(0)">
+                            <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                        </label>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -146,69 +283,21 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800 text-slate-300">
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">Relational DB (Serverless / Managed)</td>
-                                <td class="p-3">Amazon Aurora</td>
-                                <td class="p-3">Cloud SQL / AlloyDB</td>
-                                <td class="p-3">Azure SQL Database</td>
-                                <td class="p-3 text-slate-400">PostgreSQL / MySQL</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">Global Distributed SQL (Spanner-like)</td>
-                                <td class="p-3">Aurora Global Database</td>
-                                <td class="p-3 text-blue-300 font-semibold">Cloud Spanner</td>
-                                <td class="p-3">Cosmos DB (PostgreSQL API)</td>
-                                <td class="p-3 text-slate-400">CockroachDB / YugabyteDB</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">NoSQL Key-Value / Wide-Column</td>
-                                <td class="p-3 text-amber-300 font-semibold">Amazon DynamoDB</td>
-                                <td class="p-3 text-blue-300 font-semibold">Cloud Bigtable</td>
-                                <td class="p-3 text-sky-300 font-semibold">Azure Cosmos DB</td>
-                                <td class="p-3 text-slate-400">Cassandra / ScyllaDB</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">In-Memory Cache</td>
-                                <td class="p-3">Amazon ElastiCache</td>
-                                <td class="p-3">Cloud Memorystore</td>
-                                <td class="p-3">Azure Cache for Redis</td>
-                                <td class="p-3 text-slate-400">Redis / KeyDB / Memcached</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">Event Streaming Log</td>
-                                <td class="p-3">Amazon MSK / Kinesis</td>
-                                <td class="p-3 text-blue-300 font-semibold">Cloud Pub/Sub</td>
-                                <td class="p-3">Azure Event Hubs</td>
-                                <td class="p-3 text-slate-400">Apache Kafka / Redpanda</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">Message Task Queue</td>
-                                <td class="p-3">Amazon SQS</td>
-                                <td class="p-3">Pub/Sub (Queue mode) / Tasks</td>
-                                <td class="p-3">Azure Service Bus / Queue</td>
-                                <td class="p-3 text-slate-400">RabbitMQ / Celery</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">Object Storage</td>
-                                <td class="p-3">Amazon S3</td>
-                                <td class="p-3">Google Cloud Storage</td>
-                                <td class="p-3">Azure Blob Storage</td>
-                                <td class="p-3 text-slate-400">MinIO / Ceph</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-white bg-slate-950/40">API Gateway & Edge Routing</td>
-                                <td class="p-3">Amazon API Gateway</td>
-                                <td class="p-3">Apigee / Cloud Endpoints</td>
-                                <td class="p-3">Azure API Management</td>
-                                <td class="p-3 text-slate-400">Kong / Envoy / Traefik</td>
-                            </tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Relational DB (Serverless / Managed)</td><td class="p-3">Amazon Aurora</td><td class="p-3">Cloud SQL / AlloyDB</td><td class="p-3">Azure SQL Database</td><td class="p-3 text-slate-400">PostgreSQL / MySQL</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Global Distributed SQL (Spanner-like)</td><td class="p-3">Aurora Global Database</td><td class="p-3 text-blue-300 font-semibold">Cloud Spanner</td><td class="p-3">Cosmos DB (PostgreSQL API)</td><td class="p-3 text-slate-400">CockroachDB / YugabyteDB</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">NoSQL Key-Value / Wide-Column</td><td class="p-3 text-amber-300 font-semibold">Amazon DynamoDB</td><td class="p-3 text-blue-300 font-semibold">Cloud Bigtable</td><td class="p-3 text-sky-300 font-semibold">Azure Cosmos DB</td><td class="p-3 text-slate-400">Cassandra / ScyllaDB</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">In-Memory Cache</td><td class="p-3">Amazon ElastiCache</td><td class="p-3">Cloud Memorystore</td><td class="p-3">Azure Cache for Redis</td><td class="p-3 text-slate-400">Redis / KeyDB / Memcached</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Event Streaming Log</td><td class="p-3">Amazon MSK / Kinesis</td><td class="p-3 text-blue-300 font-semibold">Cloud Pub/Sub</td><td class="p-3">Azure Event Hubs</td><td class="p-3 text-slate-400">Apache Kafka / Redpanda</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Message Task Queue</td><td class="p-3">Amazon SQS</td><td class="p-3">Pub/Sub (Queue mode) / Tasks</td><td class="p-3">Azure Service Bus / Queue</td><td class="p-3 text-slate-400">RabbitMQ / Celery</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">Object Storage</td><td class="p-3">Amazon S3</td><td class="p-3">Google Cloud Storage</td><td class="p-3">Azure Blob Storage</td><td class="p-3 text-slate-400">MinIO / Ceph</td></tr>
+                            <tr><td class="p-3 font-medium text-white bg-slate-950/40">API Gateway & Edge Routing</td><td class="p-3">Amazon API Gateway</td><td class="p-3">Apigee / Cloud Endpoints</td><td class="p-3">Azure API Management</td><td class="p-3 text-slate-400">Kong / Envoy / Traefik</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
             <!-- MODULE 2: Storage Engines & Internal Mechanics -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="storage" data-keywords="b-tree lsm tree rocksdb cassandra innodb compaction write amplification bloom filter waf raf saf">
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="storage" data-keywords="b-tree lsm tree rocksdb cassandra innodb compaction write amplification bloom filter waf raf saf" data-module="1">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-database text-lg"></i></div>
@@ -217,7 +306,9 @@
                             <p class="text-xs text-slate-400">Page updates in-place vs. append-only MemTable & SSTable flush cycles</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-amber-500/10 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full font-bold">Data Engine Primitives</span>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(1)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -226,25 +317,16 @@
                             <span class="font-bold text-amber-400 text-sm">B-Tree / B+Tree (InnoDB, Postgres)</span>
                             <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">In-Place Updates</span>
                         </div>
-                        <p class="text-slate-300 leading-relaxed">
-                            Organizes data into fixed 8KB–16KB disk pages. Reads require $O(\log N)$ point page lookups. Writes modify pages in-place, creating page splits and high random I/O.
-                        </p>
-                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
-                            <strong>Amplification:</strong> Low Read Amplification ($RAF$), High Write Amplification ($WAF$).
-                        </div>
+                        <p class="text-slate-300 leading-relaxed">Organizes data into fixed 8KB–16KB disk pages. Reads require O(log N) point page lookups. Writes modify pages in-place, creating page splits and high random I/O.</p>
+                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80"><strong>Amplification:</strong> Low Read Amplification (RAF), High Write Amplification (WAF).</div>
                     </div>
-
                     <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-emerald-400 text-sm">LSM-Tree (RocksDB, ScyllaDB, Cassandra)</span>
                             <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">Sequential Append</span>
                         </div>
-                        <p class="text-slate-300 leading-relaxed">
-                            Appends writes sequentially to an in-memory <strong>MemTable</strong> and Write-Ahead Log (WAL). Flushes MemTables to disk as immutable <strong>SSTables</strong>.
-                        </p>
-                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
-                            <strong>Amplification:</strong> Low $WAF$ initially, but background <em>Compaction</em> uses disk I/O to merge keys and purge tombstones.
-                        </div>
+                        <p class="text-slate-300 leading-relaxed">Appends writes sequentially to an in-memory <strong>MemTable</strong> and Write-Ahead Log (WAL). Flushes MemTables to disk as immutable <strong>SSTables</strong>.</p>
+                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80"><strong>Amplification:</strong> Low WAF initially, but background <em>Compaction</em> uses disk I/O to merge keys and purge tombstones.</div>
                     </div>
                 </div>
 
@@ -254,23 +336,170 @@
                         <span class="font-mono text-[10px] text-slate-400">Probabilistic Data Structure</span>
                     </div>
                     <div class="code-block text-emerald-400">p ≈ (1 - e^(-kn/m))^k</div>
-                    <p class="text-slate-300 text-[11px] leading-relaxed">
-                        Where $m$ = bit array size, $n$ = element count, and $k$ = hash functions. Bloom filters prevent LSM reads from checking disk SSTables if a key is absent, eliminating wasted disk I/O.
-                    </p>
+                    <p class="text-slate-300 text-[11px] leading-relaxed">Where m = bit array size, n = element count, and k = hash functions. Bloom filters prevent LSM reads from checking disk SSTables if a key is absent, eliminating wasted disk I/O.</p>
                 </div>
             </section>
 
-            <!-- MODULE 3: Distributed Consistency & Consensus -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="consistency" data-keywords="cap pacelc quorum raft paxos true time spanner atomic clock consistency vector clock">
+            <!-- MODULE 3: DDIA Core Mechanics - Data Encoding & Schema Evolution -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="ddia encoding" data-keywords="ddia schema evolution avro protobuf thrift forward backward compatibility schema registry serialization field tags wire format" data-module="2">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-violet-500/10 text-violet-400 rounded-xl border border-violet-500/20"><i class="fa-solid fa-code text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">3. Data Encoding & Schema Evolution (DDIA Deep-Dive)</h2>
+                            <p class="text-xs text-slate-400">Forward/backward compatibility, binary serialization formats, and schema registries</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-violet-500/10 text-violet-300 border border-violet-500/30 px-3 py-1 rounded-full font-bold">Kleppmann Standard</span>
+                </div>
+
+                <!-- Toggle Card: Avro vs Protobuf -->
+                <div class="toggle-card bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2" onclick="this.classList.toggle('active')">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-indigo-400 text-sm"><i class="fa-solid fa-code-merge mr-1"></i> Avro vs. Protobuf: Wire Format Comparison</span>
+                        <i class="fa-solid fa-chevron-down toggle-icon text-slate-400"></i>
+                    </div>
+                    <p class="text-slate-400 text-[11px]">Click to expand detailed comparison of binary encoding strategies</p>
+                    <div class="toggle-content space-y-3 pt-2">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                <span class="font-bold text-amber-400 block mb-1">Apache Avro</span>
+                                <p class="text-slate-300 leading-relaxed">Writer's schema is embedded in the payload header. Reader resolves using their own schema via field name matching. No field tags needed. Forward compatibility: readers use defaults for unknown fields. Backward compatibility: writers can add fields with defaults.</p>
+                                <div class="mt-2 text-[11px] bg-amber-500/10 text-amber-300 p-2 rounded"><strong>Best for:</strong> Long-term storage (Hadoop, Kafka) where schema registry manages evolutionary rules.</div>
+                            </div>
+                            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                <span class="font-bold text-blue-400 block mb-1">Protocol Buffers (Protobuf)</span>
+                                <p class="text-slate-300 leading-relaxed">Uses explicit field tags (integers 1–2^29) and wire types (Varint, 64-bit, Length-delimited). Unknown fields are skipped based on tag number. Forward/backward compatibility requires never reusing or changing a field tag.</p>
+                                <div class="mt-2 text-[11px] bg-blue-500/10 text-blue-300 p-2 rounded"><strong>Best for:</strong> RPC/gRPC systems where message schemas evolve with versioned APIs.</div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-emerald-400 block mb-1">Schema Registry Pattern (Crucial for Zero-Downtime Deployments)</span>
+                            <p class="text-slate-300 leading-relaxed">A centralized registry (Confluent Schema Registry, Apicurio) stores all schema versions. Producers register new schemas before writing; consumers fetch the writer's schema ID from the message header. Validation rules enforce compatibility (BACKWARD, FORWARD, FULL, NONE) during rolling microservice deployments, preventing deserialization failures.</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-rose-400 block mb-1">JSON/XML vs. Binary: The Cost of Flexibility</span>
+                            <p class="text-slate-300 leading-relaxed">JSON and XML are self-describing (field names repeated per record), consuming 3–10x more bandwidth and parsing CPU. Binary formats (Avro, Protobuf, Thrift) use compact integer tags or schema IDs, reducing payload size and enabling zero-copy deserialization in languages like Rust and C++.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 4: Advanced Replication & Consensus Edge Cases -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="ddia replication" data-keywords="ddia multi leader replication crdt conflict resolution last write wins operational transformation pn counter or set merkle tree anti entropy read repair hinted handoff sloppy quorum" data-module="3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/20"><i class="fa-solid fa-arrows-spin text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">4. Advanced Replication & Consensus Edge Cases</h2>
+                            <p class="text-xs text-slate-400">Multi-leader conflict resolution, CRDTs, leaderless quorums, and anti-entropy</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full font-bold">DDIA Replication</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-cyan-400 text-sm block"><i class="fa-solid fa-people-arrows mr-1"></i> Multi-Leader Replication</span>
+                        <p class="text-slate-300 leading-relaxed">Multiple nodes accept writes concurrently. Conflict resolution strategies include:</p>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1 mt-1">
+                            <li><strong class="text-amber-300">Last-Write-Wins (LWW):</strong> Uses wall-clock timestamps. Hazard: clock skew causes data loss. Only safe for ephemeral/cache data.</li>
+                            <li><strong class="text-emerald-300">Operational Transformation (OT):</strong> Used in Google Docs. Transforms concurrent operations against each other to produce a consistent document state.</li>
+                            <li><strong class="text-violet-300">CRDTs:</strong> Conflict-free Replicated Data Types that converge automatically via commutative/associative merge operations.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-cyan-400 text-sm block"><i class="fa-solid fa-shield-halved mr-1"></i> Leaderless Quorums & Anti-Entropy</span>
+                        <p class="text-slate-300 leading-relaxed">In Dynamo-style systems (Cassandra, ScyllaDB, Riak):</p>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1 mt-1">
+                            <li><strong class="text-amber-300">Sloppy Quorums:</strong> Writes accepted by any N healthy nodes, not just the first N in the preference list. Hinted handoff replays to offline nodes when they recover.</li>
+                            <li><strong class="text-emerald-300">Read Repair:</strong> On read, if replicas return different versions, the coordinator writes the latest version back to stale nodes.</li>
+                            <li><strong class="text-violet-300">Merkle Trees:</strong> Each node maintains a hash tree of its key range. Anti-entropy compares Merkle tree roots to efficiently detect and sync divergent partitions without transferring full datasets.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                    <div class="font-bold text-cyan-300"><i class="fa-solid fa-cubes mr-1"></i> CRDT Deep-Dive: PN-Counter & OR-Set</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-emerald-400 block mb-1">PN-Counter (Positive-Negative Counter)</span>
+                            <p class="text-slate-300">Each node maintains two G-Counters (grow-only): one for increments, one for decrements. Merge = element-wise max of both vectors. Converges regardless of message ordering.</p>
+                            <div class="mt-1 text-[11px] font-mono text-slate-400">merge(a, b) = { p: max(a.p, b.p), n: max(a.n, b.n) }</div>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-violet-400 block mb-1">OR-Set (Observed-Remove Set)</span>
+                            <p class="text-slate-300">Each element is tagged with a unique (node_id, timestamp) pair. Adds insert the tag; removes add the tag to a tombstone set. Re-adding after removal creates a new unique tag, preventing resurrection.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 5: Transactions, Concurrency Control & Isolation Levels -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="ddia transactions" data-keywords="ddia mvcc isolation level dirty read non repeatable read phantom read write skew snapshot isolation serializable ssi two phase commit saga pattern choreography orchestration" data-module="4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20"><i class="fa-solid fa-shield text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">5. Transactions, Concurrency Control & Isolation Levels</h2>
+                            <p class="text-xs text-slate-400">MVCC, anomaly detection, and distributed transaction patterns</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-rose-500/10 text-rose-300 border border-rose-500/30 px-3 py-1 rounded-full font-bold">DDIA Transactions</span>
+                </div>
+
+                <!-- Isolation Matrix -->
+                <div class="overflow-x-auto text-xs">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 text-slate-200 border-b border-slate-800">
+                                <th class="p-2 font-semibold">Isolation Level</th>
+                                <th class="p-2 font-semibold">Dirty Read</th>
+                                <th class="p-2 font-semibold">Non-Repeatable Read</th>
+                                <th class="p-2 font-semibold">Phantom Read</th>
+                                <th class="p-2 font-semibold">Write Skew</th>
+                                <th class="p-2 font-semibold">Lost Update</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            <tr><td class="p-2 font-medium text-white">Read Uncommitted</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td></tr>
+                            <tr><td class="p-2 font-medium text-white">Read Committed</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td></tr>
+                            <tr><td class="p-2 font-medium text-white">Snapshot Isolation (MVCC)</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-red-400">&#x2717;</td><td class="p-2 text-red-400">&#x2717;</td></tr>
+                            <tr><td class="p-2 font-medium text-white">Serializable (SSI)</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-emerald-400">&#x2713;</td><td class="p-2 text-emerald-400">&#x2713;</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-rose-400 text-sm block"><i class="fa-solid fa-layer-group mr-1"></i> MVCC & Serializable Snapshot Isolation (SSI)</span>
+                        <p class="text-slate-300 leading-relaxed">Multi-Version Concurrency Control prevents read-write locks by maintaining multiple physical versions of a row. SSI detects <em>write-skew anomalies</em> (where transactions read overlapping data sets but write to disjoint keys) using optimistic concurrency checks, aborting conflicting transactions safely.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-rose-400 text-sm block"><i class="fa-solid fa-code-branch mr-1"></i> Distributed Transactions: 2PC vs. Sagas</span>
+                        <p class="text-slate-300 leading-relaxed"><strong>Two-Phase Commit (2PC):</strong> Coordinator sends PREPARE to all participants, then COMMIT/ABORT. Blocking: if coordinator crashes after PREPARE, participants hold locks until recovery. Extreme tail latency at scale.</p>
+                        <p class="text-slate-300 leading-relaxed mt-1"><strong>Saga Pattern:</strong> Each transaction step publishes an event triggering the next step. On failure, compensating transactions undo previous steps. Two flavors:</p>
+                        <ul class="list-disc list-inside text-slate-300 mt-1">
+                            <li><strong class="text-amber-300">Choreography:</strong> Each service publishes events consumed by the next. Decentralized but hard to trace.</li>
+                            <li><strong class="text-emerald-300">Orchestration:</strong> A central Saga orchestrator (e.g., Axon, Temporal) commands each step. Centralized control with clear failure boundaries.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 6: Distributed Consistency & Consensus -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="consistency" data-keywords="cap pacelc quorum raft paxos true time spanner atomic clock consistency vector clock" data-module="5">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20"><i class="fa-solid fa-scale-balanced text-lg"></i></div>
                         <div>
-                            <h2 class="text-base font-bold text-white">3. Distributed Consistency: PACELC & Quorum Math</h2>
+                            <h2 class="text-base font-bold text-white">6. Distributed Consistency: PACELC & Quorum Math</h2>
                             <p class="text-xs text-slate-400">Evaluating partition tradeoffs (CAP) and normal operating latencies (PACELC)</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full font-bold">Consensus Primitives</span>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(5)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
                 </div>
 
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-xs">
@@ -289,118 +518,330 @@
 
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
                     <div class="font-bold text-blue-300"><i class="fa-solid fa-calculator mr-1"></i> Quorum Math Equation</div>
-                    <p class="text-slate-300">
-                        Strong linearizable consistency is mathematically guaranteed when Write Quorum ($W$) plus Read Quorum ($R$) strictly exceeds Replication Factor ($N$):
-                    </p>
+                    <p class="text-slate-300">Strong linearizable consistency is mathematically guaranteed when Write Quorum (W) plus Read Quorum (R) strictly exceeds Replication Factor (N):</p>
                     <div class="code-block text-blue-400 text-sm">W + R > N</div>
-                    <p class="text-slate-400 text-[11px]">
-                        Guarantee: The write set and read set must overlap by at least one node containing the latest vector clock or monotonic timestamp.
-                    </p>
+                    <p class="text-slate-400 text-[11px]">Guarantee: The write set and read set must overlap by at least one node containing the latest vector clock or monotonic timestamp.</p>
                 </div>
             </section>
 
-            <!-- MODULE 4: Resiliency, Caching & Thundering Herd -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="caching" data-keywords="cache stampede thundering herd xfetch request coalescing singleflight redis rate limiter token bucket">
+            <!-- MODULE 7: Resiliency, Caching & Thundering Herd -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="caching" data-keywords="cache stampede thundering herd xfetch request coalescing singleflight redis rate limiter token bucket" data-module="6">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-yellow-500/10 text-yellow-400 rounded-xl border border-yellow-500/20"><i class="fa-solid fa-bolt text-lg"></i></div>
                         <div>
-                            <h2 class="text-base font-bold text-white">4. Resiliency & High-Concurrency Shielding</h2>
+                            <h2 class="text-base font-bold text-white">7. Resiliency & High-Concurrency Shielding</h2>
                             <p class="text-xs text-slate-400">Preventing database outages caused by cache stampedes and thundering herds</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 px-3 py-1 rounded-full font-bold">Thundering Herd Defense</span>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(6)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                         <div class="font-bold text-yellow-400 text-sm">1. Single-Flight Request Coalescing</div>
-                        <p class="text-slate-300 leading-relaxed">
-                            An intermediary proxy layer (e.g. Go `golang.org/x/sync/singleflight` or Rust proxy) catches thousands of concurrent read requests for the same missing cache key. It issues <strong>only 1 query</strong> to the DB and broadcasts the response to all waiting callers.
-                        </p>
+                        <p class="text-slate-300 leading-relaxed">An intermediary proxy layer (e.g. Go `golang.org/x/sync/singleflight` or Rust proxy) catches thousands of concurrent read requests for the same missing cache key. It issues <strong>only 1 query</strong> to the DB and broadcasts the response to all waiting callers.</p>
                     </div>
-
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                         <div class="font-bold text-yellow-400 text-sm">2. XFetch Probabilistic Early Expiration</div>
-                        <p class="text-slate-300 leading-relaxed">
-                            Instead of waiting for a key to die ($TTL = 0$), read workers randomly trigger a background re-computation early as expiration approaches, scaled by compute delta ($\delta$) and request frequency.
-                        </p>
+                        <p class="text-slate-300 leading-relaxed">Instead of waiting for a key to die (TTL = 0), read workers randomly trigger a background re-computation early as expiration approaches, scaled by compute delta (delta) and request frequency.</p>
                     </div>
                 </div>
 
                 <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs font-mono text-yellow-300">
-                    XFetch Formula:  -β * δ * ln(random()) > TTL - now
+                    XFetch Formula: -beta * delta * ln(random()) > TTL - now
                 </div>
             </section>
 
-            <!-- MODULE 5: Relational Database Scaling & Multiplexing -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="scaling" data-keywords="vitess mysql thread starvation postgres pgbouncer proxy grpc context switching connection pool">
+            <!-- MODULE 8: Relational Database Scaling & Multiplexing -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="scaling" data-keywords="vitess mysql thread starvation postgres pgbouncer proxy grpc context switching connection pool" data-module="7">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20"><i class="fa-solid fa-server text-lg"></i></div>
                         <div>
-                            <h2 class="text-base font-bold text-white">5. Relational Scaling & Connection Multiplexing</h2>
+                            <h2 class="text-base font-bold text-white">8. Relational Scaling & Connection Multiplexing</h2>
                             <p class="text-xs text-slate-400">Solving OS thread stack memory explosion and CPU context-switching starvation</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full font-bold">Relational Scale</span>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(7)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
                 </div>
 
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
                     <div class="font-bold text-emerald-400 text-sm">The OS Thread Starvation Bottleneck</div>
-                    <p class="text-slate-300 leading-relaxed">
-                        Relational databases allocate a dedicated OS process/thread per connection. When 10,000 application workers open direct TCP connections, RAM is exhausted ($10,000 	imes 	ext{thread stack buffer}$) and CPU context-switching degrades query execution to zero throughput.
-                    </p>
+                    <p class="text-slate-300 leading-relaxed">Relational databases allocate a dedicated OS process/thread per connection. When 10,000 application workers open direct TCP connections, RAM is exhausted (10,000 x thread stack buffer) and CPU context-switching degrades query execution to zero throughput.</p>
                     <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-slate-300">
                         <strong class="text-emerald-300">Solution (Vitess Proxy Architecture):</strong> VTGate proxies intercept standard SQL, multiplexing 50,000+ app connections down to a small, persistent pool of gRPC connections managed by VTTablet instances next to MySQL nodes.
                     </div>
                 </div>
             </section>
 
-            <!-- MODULE 6: Asynchronous Streaming & Geospatial Architecture -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="messaging" data-keywords="kafka rabbitmq sqs geohash quadtree uber h3 commit log pubsub geospatial">
+            <!-- MODULE 9: Asynchronous Streaming & Geospatial Architecture -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="messaging" data-keywords="kafka rabbitmq sqs geohash quadtree uber h3 commit log pubsub geospatial" data-module="8">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20"><i class="fa-solid fa-network-wired text-lg"></i></div>
                         <div>
-                            <h2 class="text-base font-bold text-white">6. Event Streams & Geospatial Partitioning</h2>
+                            <h2 class="text-base font-bold text-white">9. Event Streams & Geospatial Partitioning</h2>
                             <p class="text-xs text-slate-400">Append-only commit logs vs. task queues, and Uber H3 hexagonal indexing</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-purple-500/10 text-purple-300 border border-purple-500/30 px-3 py-1 rounded-full font-bold">Event Infrastructure</span>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(8)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                         <span class="font-bold text-purple-400 text-sm block">Task Queues (RabbitMQ, SQS)</span>
-                        <p class="text-slate-300">
-                            Destructive consumption pattern. Messages are removed once acknowledged by a worker. Non-replayable state.
-                        </p>
+                        <p class="text-slate-300">Destructive consumption pattern. Messages are removed once acknowledged by a worker. Non-replayable state.</p>
                     </div>
-
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                         <span class="font-bold text-purple-400 text-sm block">Commit Logs (Kafka, Pub/Sub)</span>
-                        <p class="text-slate-300">
-                            Immutable append-only disk log. Independent consumer groups track offset pointers. Replayable history.
-                        </p>
+                        <p class="text-slate-300">Immutable append-only disk log. Independent consumer groups track offset pointers. Replayable history.</p>
                     </div>
                 </div>
 
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
                     <div class="font-bold text-purple-300">Geospatial Scaling: Uber H3 Hexagonal Grid</div>
-                    <p class="text-slate-300 leading-relaxed">
-                        Traditional 2D lat/long queries break B-Tree indexes. Square grids (Geohash) suffer from diagonal distortion (corners are $\sqrt{2}	imes$ further than edges). <strong>Uber H3</strong> partitions the globe into 16 resolution levels of hexagons, where all 6 adjacent neighbors share identical center-point distances.
-                    </p>
+                    <p class="text-slate-300 leading-relaxed">Traditional 2D lat/long queries break B-Tree indexes. Square grids (Geohash) suffer from diagonal distortion (corners are sqrt(2)x further than edges). <strong>Uber H3</strong> partitions the globe into 16 resolution levels of hexagons, where all 6 adjacent neighbors share identical center-point distances.</p>
                 </div>
             </section>
 
-            <!-- MODULE 7: Comprehensive Case Studies (Alex Xu / ByteByteGo Grade) -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="case-studies" data-keywords="discord slack google spanner uber netflix whatsapp stripe twitter youtube case study architecture bytebytego alex xu">
+            <!-- MODULE 10: Batch & Stream Processing -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="ddia streaming" data-keywords="ddia batch stream processing change data capture cdc debezium outbox pattern event sourcing dual write lambda architecture kappa architecture" data-module="9">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-orange-500/10 text-orange-400 rounded-xl border border-orange-500/20"><i class="fa-solid fa-arrow-trend-up text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">10. Batch & Stream Processing (DDIA Deep-Dive)</h2>
+                            <p class="text-xs text-slate-400">CDC, dual-write problems, Outbox Pattern, Event Sourcing, Lambda vs. Kappa</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-orange-500/10 text-orange-300 border border-orange-500/30 px-3 py-1 rounded-full font-bold">DDIA Processing</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-orange-400 text-sm block"><i class="fa-solid fa-database mr-1"></i> Change Data Capture (CDC)</span>
+                        <p class="text-slate-300 leading-relaxed">Tools like Debezium read the database's replication log (WAL) and emit row-level changes as a Kafka stream. Enables real-time indexing (Elasticsearch), cache invalidation, and analytics without dual-write coordination.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-orange-400 text-sm block"><i class="fa-solid fa-envelope mr-1"></i> Dual-Write Problem & Outbox Pattern</span>
+                        <p class="text-slate-300 leading-relaxed"><strong>Problem:</strong> Writing to DB and sending a message in the same request is not atomic. If the message send fails after DB commit, the system is inconsistent.</p>
+                        <p class="text-slate-300 leading-relaxed mt-1"><strong>Outbox Pattern:</strong> Write both the business data and an outbox message in the same DB transaction. A separate process (e.g., Kafka Connect, Debezium) reads the outbox table and publishes the message reliably.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-orange-400 text-sm block"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Event Sourcing</span>
+                        <p class="text-slate-300 leading-relaxed">Store all state changes as an append-only event log. Current state is derived by replaying events. Enables complete audit trails, temporal queries, and rebuilding state from scratch. Used in financial systems and collaboration tools (e.g., Git).</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <span class="font-bold text-orange-400 text-sm block"><i class="fa-solid fa-code-compare mr-1"></i> Lambda vs. Kappa Architecture</span>
+                        <p class="text-slate-300 leading-relaxed"><strong>Lambda:</strong> Two parallel pipelines (batch for accurate historical views, stream for low-latency). Complexity: maintaining two codebases that produce the same result.</p>
+                        <p class="text-slate-300 leading-relaxed mt-1"><strong>Kappa:</strong> Single streaming pipeline with sufficient retention. Re-processing is done by replaying the stream from an earlier offset. Simpler but requires high-throughput stream storage (Kafka, Redpanda).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 11: Interactive Back-of-the-Envelope Estimator -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="estimations" data-keywords="back of the envelope calculations qps bandwidth storage calculator scale math estimation" data-module="10">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-teal-500/10 text-teal-400 rounded-xl border border-teal-500/20"><i class="fa-solid fa-calculator text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">11. Interactive Back-of-the-Envelope Estimator</h2>
+                            <p class="text-xs text-slate-400">Quickly estimate production scale metrics for interview architecture prompts</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-teal-500/10 text-teal-300 border border-teal-500/30 px-3 py-1 rounded-full font-bold">System Design Math</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="space-y-1">
+                        <label class="text-slate-400">Daily Active Users (DAU)</label>
+                        <input type="number" id="calcDau" value="10000000" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:border-teal-500 focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-slate-400">Actions / User / Day</label>
+                        <input type="number" id="calcActions" value="20" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:border-teal-500 focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-slate-400">Avg Payload Size (KB)</label>
+                        <input type="number" id="calcPayload" value="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:border-teal-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="space-y-1">
+                        <label class="text-slate-400">Read / Write Ratio (e.g. 80 for 80% reads)</label>
+                        <input type="number" id="calcReadRatio" value="80" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:border-teal-500 focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-slate-400">Peak Multiplier (default 2x)</label>
+                        <input type="number" id="calcPeakMultiplier" value="2" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:border-teal-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <button onclick="runCalculation()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 rounded-xl transition-colors text-xs">
+                    Calculate Scale Metrics
+                </button>
+
+                <div id="calcResults" class="hidden bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2 font-mono">
+                    <div class="text-teal-400 font-bold">Estimated Infrastructure Load:</div>
+                    <div id="resQps" class="text-slate-300"></div>
+                    <div id="resBandwidth" class="text-slate-300"></div>
+                    <div id="resStorage" class="text-slate-300"></div>
+                    <div id="resReadWrite" class="text-slate-300"></div>
+                </div>
+            </section>
+
+            <!-- MODULE 12: Advanced Rate Limiting & Load Balancing Algorithms -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="rate-limiting" data-keywords="rate limiter token bucket leaky bucket fixed window sliding window log counter load balancer l4 l7 consistent hashing virtual node envoy nginx" data-module="11">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-lime-500/10 text-lime-400 rounded-xl border border-lime-500/20"><i class="fa-solid fa-gauge-high text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">12. Rate Limiting & Load Balancing Algorithms</h2>
+                            <p class="text-xs text-slate-400">Mathematical breakdowns of throttling strategies and traffic distribution</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-lime-500/10 text-lime-300 border border-lime-500/30 px-3 py-1 rounded-full font-bold">Traffic Engineering</span>
+                </div>
+
+                <!-- Rate Limiters -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-lime-400 text-sm"><i class="fa-solid fa-gauge mr-1"></i> Rate Limiting Algorithms</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-amber-400 block mb-1">Token Bucket</span>
+                            <p class="text-slate-300">A bucket holds up to b tokens. Tokens are added at rate r per second. Each request consumes 1 token. Bursts up to b are allowed. Simple and memory-efficient. Used by AWS API Gateway, Stripe.</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-blue-400 block mb-1">Leaky Bucket</span>
+                            <p class="text-slate-300">Requests enter a FIFO queue processed at a fixed rate. Excess requests are discarded. Smooths traffic bursts into a steady outflow. Used by NGINX `limit_req`.</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-rose-400 block mb-1">Fixed Window Counter</span>
+                            <p class="text-slate-300">Divide time into fixed windows (e.g., 1 second). Each window has a counter. If counter exceeds limit, requests are dropped. Problem: traffic spikes at window boundaries (2x limit possible).</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-emerald-400 block mb-1">Sliding Window Log</span>
+                            <p class="text-slate-300">Maintain a sorted set of timestamps per user. On each request, remove timestamps older than window duration. If count exceeds limit, reject. Accurate but memory-intensive per user.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                        <span class="font-bold text-violet-400 block mb-1">Sliding Window Counter (Redis Sorted Set)</span>
+                        <p class="text-slate-300">Hybrid approach: uses a Redis sorted set with millisecond-precision scores. ZREMRANGEBYSCORE removes expired entries; ZCARD checks count. Memory-efficient approximation of sliding window log with configurable precision.</p>
+                    </div>
+                </div>
+
+                <!-- Load Balancers -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+                    <div class="font-bold text-lime-400 text-sm"><i class="fa-solid fa-scale-balanced mr-1"></i> Load Balancing: L4 vs. L7 & Consistent Hashing</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-amber-400 block mb-1">L4 (Transport Layer)</span>
+                            <p class="text-slate-300">Routes based on TCP/UDP headers (IP, port). No payload inspection. Extremely fast (kernel-level, DPDK). Used by AWS NLB, HAProxy in TCP mode. Cannot route by HTTP path or headers.</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-bold text-blue-400 block mb-1">L7 (Application Layer)</span>
+                            <p class="text-slate-300">Inspects HTTP headers, paths, cookies, gRPC metadata. Enables path-based routing, header-based canary deployments, and rate limiting. Used by Envoy, NGINX, AWS ALB. Higher CPU cost per request.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                        <span class="font-bold text-emerald-400 block mb-1">Consistent Hashing with Virtual Nodes</span>
+                        <p class="text-slate-300">Maps keys to positions on a hash ring. Each physical node is represented by multiple virtual nodes (e.g., 100–200) spread across the ring. When a node is added/removed, only 1/N of keys are remapped (vs. N/N for modulo). Virtual nodes ensure balanced load even with heterogeneous hardware. Used by Amazon DynamoDB, Cassandra, Discord's Ringpop.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 13: Architecture Anti-Patterns & Common Traps -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="anti-patterns" data-keywords="anti patterns resume driven development microservices premature optimization tco cloud cost over engineering mongodb is web scale" data-module="12">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">13. Architecture Anti-Patterns & Common System Design Traps</h2>
+                            <p class="text-xs text-slate-400">Avoiding hype-driven development, hidden TCO costs, and premature architectural complexity</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-amber-500/10 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full font-bold">Principal Mindset</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    
+                    <!-- Trap 1: Resume-Driven Development -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> 1. Resume-Driven Development (RDD)
+                            </span>
+                            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-mono">Hype Trap</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>The Trap:</strong> Adopting complex enterprise tools (e.g., Apache Kafka, Kubernetes, service meshes, or distributed graph databases) for a low-traffic application because "it's what FAANG uses."<br>
+                            <strong>Reality Check:</strong> A managed PostgreSQL database with proper indexes and a simple message queue can effortlessly handle thousands of QPS at 1/10th of the operational burden. Choose boring technology unless your scale explicitly demands otherwise.
+                        </p>
+                    </div>
+
+                    <!-- Trap 2: Premature Microservices -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-puzzle-piece"></i> 2. Premature Distributed Monoliths
+                            </span>
+                            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-mono">Complexity Trap</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>The Trap:</strong> Splitting a greenfield project into 20 microservices before domain boundaries are even understood.<br>
+                            <strong>Reality Check:</strong> You trade internal function calls for fragile network calls, distributed debugging nightmares, eventual consistency bugs, and deployment coordination hell. Start with a <em>Modular Monolith</em> until scaling team structure or domain isolation forces a split.
+                        </p>
+                    </div>
+
+                    <!-- Trap 3: Ignoring Total Cost of Ownership (TCO) -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-file-invoice-dollar"></i> 3. Cloud Bill Shock & Over-Provisioning
+                            </span>
+                            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-mono">Financial Trap</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>The Trap:</strong> Designing for multi-region active-active replication, serverless auto-scaling, and global edge caching for an app with 500 daily users.<br>
+                            <strong>Reality Check:</strong> Managed cloud services have hidden egress, IOPS, and provisioned concurrency costs. Always calculate the <strong>Total Cost of Ownership (TCO)</strong>, including infrastructure spend vs. engineering hours required to maintain custom alternatives.
+                        </p>
+                    </div>
+
+                    <!-- Trap 4: Silver Bullet Mentality -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-crosshairs"></i> 4. The "NoSQL is Web Scale" Fallacy
+                            </span>
+                            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-mono">Data Model Trap</span>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            <strong>The Trap:</strong> Choosing a NoSQL document database or key-value store just because data structures change frequently, ignoring relational integrity needs.<br>
+                            <strong>Reality Check:</strong> If your business logic relies heavily on complex multi-table joins, transactions, and strict constraints, forcing it into a NoSQL store means writing your own fragile relational mapping layer in application code.
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- MODULE 14: Comprehensive Case Studies (Alex Xu / ByteByteGo Grade) -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="case-studies" data-keywords="discord slack google spanner uber netflix whatsapp stripe twitter youtube case study architecture bytebytego alex xu" data-module="13">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20"><i class="fa-solid fa-building-columns text-lg"></i></div>
                         <div>
-                            <h2 class="text-base font-bold text-white">7. Production Case Studies (ByteByteGo Grade)</h2>
+                            <h2 class="text-base font-bold text-white">14. Production Case Studies (ByteByteGo Grade)</h2>
                             <p class="text-xs text-slate-400">Deep breakdowns of real engineering transformations in top tech infrastructure</p>
                         </div>
                     </div>
@@ -410,7 +851,7 @@
                 <div class="grid grid-cols-1 gap-4 text-xs">
 
                     <!-- Case Study 1: Discord -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('discord')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-sky-400 text-sm flex items-center gap-2">
                                 <i class="fa-brands fa-discord"></i> Discord: Trillion-Message Storage Migration
@@ -418,17 +859,17 @@
                             <span class="text-[10px] bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-mono">ScyllaDB + Rust</span>
                         </div>
                         <p class="text-slate-300 leading-relaxed">
-                            <strong>Problem:</strong> 177 Cassandra nodes hit JVM Garbage Collection pauses (2–5s) during <code>@everyone</code> read storms, causing false node eviction and cascading cluster failures.<br>
+                            <strong>Problem:</strong> 177 Cassandra nodes hit JVM Garbage Collection pauses (2–5s) during @everyone read storms, causing false node eviction and cascading cluster failures.<br>
                             <strong>Solution:</strong> Migrated to ScyllaDB (C++ shard-per-core engine) eliminating JVM GC. Placed a stateful Rust proxy performing <em>Single-Flight Request Coalescing</em> in front of database nodes.
                         </p>
                         <div class="flex items-center gap-4 text-[11px] text-slate-400 font-mono pt-1">
-                            <span class="text-emerald-400">177 → 72 Nodes</span>
-                            <span class="text-emerald-400">P99 Latency: 125ms → 15ms</span>
+                            <span class="text-emerald-400">177 &rarr; 72 Nodes</span>
+                            <span class="text-emerald-400">P99 Latency: 125ms &rarr; 15ms</span>
                         </div>
                     </div>
 
                     <!-- Case Study 2: Slack -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('slack')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-emerald-400 text-sm flex items-center gap-2">
                                 <i class="fa-brands fa-slack"></i> Slack: Horizontal MySQL Scaling with Vitess
@@ -436,13 +877,13 @@
                             <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-mono">Vitess + gRPC</span>
                         </div>
                         <p class="text-slate-300 leading-relaxed">
-                            <strong>Problem:</strong> Workspace manual sharding by <code>team_id</code> broke when enterprise customers joined with 100k+ employees on a single database node.<br>
-                            <strong>Solution:</strong> Deployed Vitess. VTGate proxies multiplex incoming web connections over gRPC to VTTablet, enabling live background resharding by <code>(channel_id, user_id)</code> with zero customer downtime.
+                            <strong>Problem:</strong> Workspace manual sharding by team_id broke when enterprise customers joined with 100k+ employees on a single database node.<br>
+                            <strong>Solution:</strong> Deployed Vitess. VTGate proxies multiplex incoming web connections over gRPC to VTTablet, enabling live background resharding by (channel_id, user_id) with zero customer downtime.
                         </p>
                     </div>
 
                     <!-- Case Study 3: Netflix -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('netflix')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-red-400 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-play"></i> Netflix: Global Adaptive Streaming & Open Connect
@@ -456,7 +897,7 @@
                     </div>
 
                     <!-- Case Study 4: Uber -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('uber')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-taxi"></i> Uber: Real-Time Geospatial Driver Dispatch
@@ -470,7 +911,7 @@
                     </div>
 
                     <!-- Case Study 5: Google Cloud Spanner -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('spanner')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-blue-400 text-sm flex items-center gap-2">
                                 <i class="fa-brands fa-google"></i> Google Cloud Spanner: Global Serializability
@@ -479,12 +920,12 @@
                         </div>
                         <p class="text-slate-300 leading-relaxed">
                             <strong>Problem:</strong> Achieving globally serializable multi-region transactions without locking database reads worldwide.<br>
-                            <strong>Solution:</strong> Deployed GPS receivers + Atomic Clocks into data centers (TrueTime API) to bound clock uncertainty ($\epsilon \le 1	ext{ms}$). Enforced a Commit-Wait rule ($2\epsilon$) so cross-continent reads require zero lock overhead.
+                            <strong>Solution:</strong> Deployed GPS receivers + Atomic Clocks into data centers (TrueTime API) to bound clock uncertainty (epsilon &le; 1ms). Enforced a Commit-Wait rule (2*epsilon) so cross-continent reads require zero lock overhead.
                         </p>
                     </div>
 
                     <!-- Case Study 6: WhatsApp / Meta -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('whatsapp')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-emerald-400 text-sm flex items-center gap-2">
                                 <i class="fa-brands fa-whatsapp"></i> WhatsApp: 2B Users with Minimal Server Footprint
@@ -498,7 +939,7 @@
                     </div>
 
                     <!-- Case Study 7: Stripe -->
-                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5">
+                    <div class="case-card bg-slate-950 p-4.5 rounded-xl border border-slate-800 space-y-2.5" onclick="openDrawer('stripe')">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-indigo-400 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-credit-card"></i> Stripe: Idempotent Payment Processing Engine
@@ -507,24 +948,26 @@
                         </div>
                         <p class="text-slate-300 leading-relaxed">
                             <strong>Problem:</strong> Preventing double-charging customers during network retries or gateway timeouts.<br>
-                            <strong>Solution:</strong> Enforces mandatory <code>Idempotency-Key</code> HTTP headers. An API Gateway acquiring a Redis distributed lock checks if the transaction execution payload exists in an immutable log before forwarding requests downstream.
+                            <strong>Solution:</strong> Enforces mandatory Idempotency-Key HTTP headers. An API Gateway acquiring a Redis distributed lock checks if the transaction execution payload exists in an immutable log before forwarding requests downstream.
                         </p>
                     </div>
 
                 </div>
             </section>
 
-            <!-- MODULE 8: Production Incident & Failure Matrix -->
-            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="failure-matrix" data-keywords="failure matrix symptom root cause mitigation outage troubleshooting P99 latency">
+            <!-- MODULE 15: Production Incident & Failure Matrix -->
+            <section class="card-item bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4" data-category="failure-matrix" data-keywords="failure matrix symptom root cause mitigation outage troubleshooting P99 latency" data-module="14">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2.5 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
                         <div>
-                            <h2 class="text-base font-bold text-white">8. Incident & Failure Mitigation Matrix</h2>
+                            <h2 class="text-base font-bold text-white">15. Incident & Failure Mitigation Matrix</h2>
                             <p class="text-xs text-slate-400">Quick-reference lookup for high-scale production incidents and mitigations</p>
                         </div>
                     </div>
-                    <span class="text-xs bg-red-500/10 text-red-300 border border-red-500/30 px-3 py-1 rounded-full font-bold">Troubleshooting Reference</span>
+                    <label class="study-checkbox cursor-pointer" onclick="event.stopPropagation(); toggleStudyModule(14)">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                    </label>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -538,30 +981,12 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800 text-slate-300">
-                            <tr>
-                                <td class="p-3 font-medium text-rose-400">100% DB CPU on TTL Expiry</td>
-                                <td class="p-3">Cache Stampede / Thundering Herd</td>
-                                <td class="p-3">Single-Flight request proxy or mutex lock</td>
-                                <td class="p-3">XFetch probabilistic early expiration</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-rose-400">Unpredictable P99 Spikes (>3s)</td>
-                                <td class="p-3">JVM Stop-the-World GC pauses</td>
-                                <td class="p-3">Isolate compaction I/O; tune GC heap</td>
-                                <td class="p-3">Migrate to C++/Rust engine (ScyllaDB)</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-rose-400">Relational DB Connection Drops</td>
-                                <td class="p-3">OS thread context-switching starvation</td>
-                                <td class="p-3">Deploy PgBouncer / ProxySQL pooler</td>
-                                <td class="p-3">Deploy Vitess gRPC multiplexing middleware</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-medium text-rose-400">Uneven Node Memory / Disk</td>
-                                <td class="p-3">Hot Partition Key (Celebrity Problem)</td>
-                                <td class="p-3">Salt partition keys: <code>key_hash%N</code></td>
-                                <td class="p-3">Consistent Hashing with Virtual Nodes</td>
-                            </tr>
+                            <tr><td class="p-3 font-medium text-rose-400">100% DB CPU on TTL Expiry</td><td class="p-3">Cache Stampede / Thundering Herd</td><td class="p-3">Single-Flight request proxy or mutex lock</td><td class="p-3">XFetch probabilistic early expiration</td></tr>
+                            <tr><td class="p-3 font-medium text-rose-400">Unpredictable P99 Spikes (>3s)</td><td class="p-3">JVM Stop-the-World GC pauses</td><td class="p-3">Isolate compaction I/O; tune GC heap</td><td class="p-3">Migrate to C++/Rust engine (ScyllaDB)</td></tr>
+                            <tr><td class="p-3 font-medium text-rose-400">Relational DB Connection Drops</td><td class="p-3">OS thread context-switching starvation</td><td class="p-3">Deploy PgBouncer / ProxySQL pooler</td><td class="p-3">Deploy Vitess gRPC multiplexing middleware</td></tr>
+                            <tr><td class="p-3 font-medium text-rose-400">Uneven Node Memory / Disk</td><td class="p-3">Hot Partition Key (Celebrity Problem)</td><td class="p-3">Salt partition keys: key_hash%N</td><td class="p-3">Consistent Hashing with Virtual Nodes</td></tr>
+                            <tr><td class="p-3 font-medium text-rose-400">Schema Deserialization Failures</td><td class="p-3">Incompatible schema evolution</td><td class="p-3">Pin consumer schema version</td><td class="p-3">Deploy Schema Registry with compatibility checks</td></tr>
+                            <tr><td class="p-3 font-medium text-rose-400">Data Loss After Node Recovery</td><td class="p-3">Hinted handoff timeout exceeded</td><td class="p-3">Trigger full read-repair on affected keys</td><td class="p-3">Deploy Merkle tree anti-entropy background sync</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -572,10 +997,16 @@
 
     <!-- Footer -->
     <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500 mt-12">
-        <p>System Design Engineering Playbook • Designed for Free Hosting on GitHub Pages</p>
+        <p>System Design Engineering Playbook &bull; DDIA Grade v4.0 &bull; Designed for Free Hosting on GitHub Pages</p>
     </footer>
 
-    <!-- Interactive Search & Filtering Script -->
+    <!-- Mermaid.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { primaryColor: '#2563eb', primaryTextColor: '#fff', primaryBorderColor: '#1e293b', lineColor: '#475569', secondaryColor: '#0f172a', tertiaryColor: '#1e293b' } });
+    </script>
+
+    <!-- Interactive Search, Filtering, Drawer, Calculator & Study Tracker Script -->
     <script>
         const searchInput = document.getElementById('searchInput');
         const cards = document.querySelectorAll('.card-item');
@@ -583,6 +1014,7 @@
 
         let currentCategory = 'all';
 
+        // ===== SEARCH & FILTER =====
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             cards.forEach(card => {
@@ -591,7 +1023,7 @@
                 const category = card.getAttribute('data-category');
 
                 const matchesSearch = text.includes(query) || keywords.includes(query);
-                const matchesCategory = (currentCategory === 'all' || category === currentCategory);
+                const matchesCategory = (currentCategory === 'all' || category.includes(currentCategory));
 
                 if (matchesSearch && matchesCategory) {
                     card.style.display = 'block';
@@ -605,7 +1037,8 @@
             currentCategory = category;
 
             navButtons.forEach(btn => {
-                if (btn.getAttribute('onclick').includes(category)) {
+                const onclickAttr = btn.getAttribute('onclick') || '';
+                if (onclickAttr.includes("'" + category + "'") || onclickAttr.includes('"' + category + '"')) {
                     btn.className = 'nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-blue-600 text-white flex items-center justify-between';
                 } else {
                     btn.className = 'nav-btn w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-2';
@@ -614,6 +1047,235 @@
 
             searchInput.dispatchEvent(new Event('input'));
         }
+
+        // ===== DEEP-DIVE DRAWER =====
+        const drawerContent = {
+            discord: {
+                title: 'Discord: Trillion-Message Storage Migration',
+                subtitle: 'From Cassandra to ScyllaDB with Rust proxy layer',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph TD\n  A[Discord Clients] --> B[Rust Proxy Layer]\n  B --> C[Single-Flight Coalescing]\n  C --> D[ScyllaDB Cluster]\n  D --> E[Shard 0]\n  D --> F[Shard 1]\n  D --> G[Shard N]\n  B --> H[Redis Cache]\n  style D fill:#1e293b,stroke:#2563eb\n  style B fill:#1e293b,stroke:#10b981' },
+                    { heading: 'Problem', content: '177 Cassandra nodes experienced JVM Garbage Collection pauses of 2–5 seconds during @everyone read storms. These pauses caused false node eviction by the gossip protocol, leading to cascading cluster failures.' },
+                    { heading: 'Solution', content: 'Migrated to ScyllaDB (C++ shard-per-core engine) eliminating JVM GC entirely. Deployed a stateful Rust proxy that performs Single-Flight Request Coalescing: when thousands of users request the same missing data, only one query hits the database.' },
+                    { heading: 'Key Metrics', content: '• 177 nodes reduced to 72 nodes\n• P99 latency: 125ms → 15ms\n• Zero GC pauses\n• Rust proxy handles 1M+ concurrent connections' },
+                    { heading: 'Configuration Tuning Tips', content: '• ScyllaDB: Set --memory to 75% of available RAM\n• Enable shard-per-core for NUMA awareness\n• Rust proxy: Use tokio with io_uring for async I/O\n• Set read_repair_chance to 0.1 for eventual consistency' }
+                ]
+            },
+            slack: {
+                title: 'Slack: Horizontal MySQL Scaling with Vitess',
+                subtitle: 'From manual sharding to automated resharding',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph LR\n  A[Web Clients] --> B[VTGate Proxy]\n  B --> C[gRPC Multiplexing]\n  C --> D[VTTablet 1]\n  C --> E[VTTablet 2]\n  C --> F[VTTablet N]\n  D --> G[MySQL 1]\n  E --> H[MySQL 2]\n  F --> I[MySQL N]\n  B --> J[Topology Service]\n  style B fill:#1e293b,stroke:#10b981\n  style C fill:#1e293b,stroke:#2563eb' },
+                    { heading: 'Problem', content: 'Slack manually sharded by team_id. Enterprise customers with 100k+ employees overwhelmed a single shard. Resharding required complex, risky manual operations.' },
+                    { heading: 'Solution', content: 'Deployed Vitess. VTGate proxies multiplex 50,000+ incoming web connections over gRPC to VTTablet instances. Enabled live background resharding by (channel_id, user_id) with zero customer downtime.' },
+                    { heading: 'Key Metrics', content: '• 50,000+ connections multiplexed to ~500 persistent connections\n• Zero-downtime resharding\n• P99 query latency under 10ms' },
+                    { heading: 'Configuration Tuning Tips', content: '• VTGate: Set --grpc-connection-pool-size to 8–16\n• VTTablet: Enable query consolidation for hot reads\n• Use --healthcheck-interval 2s for fast failover' }
+                ]
+            },
+            netflix: {
+                title: 'Netflix: Global Adaptive Streaming & Open Connect',
+                subtitle: 'Hybrid cloud + CDN appliance architecture',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph TD\n  A[User Device] --> B[ISP Network]\n  B --> C[Open Connect Appliance]\n  B --> D[AWS Control Plane]\n  D --> E[User Auth]\n  D --> F[Recommendations]\n  D --> G[CDN Steering]\n  C --> H[Pre-positioned Content]\n  style C fill:#1e293b,stroke:#ef4444\n  style D fill:#1e293b,stroke:#2563eb' },
+                    { heading: 'Problem', content: 'Serving 15%+ of global internet traffic from cloud data centers would saturate transit ISPs and create massive bandwidth costs.' },
+                    { heading: 'Solution', content: 'Control plane runs on AWS (user auth, recommendations, CDN steering). Media assets are pre-positioned during off-peak hours onto custom hardware appliances (Open Connect CDN) embedded directly inside IXPs and ISP networks globally.' },
+                    { heading: 'Key Metrics', content: '• 15%+ of global internet traffic served\n• 95%+ of traffic served from Open Connect\n• < 1s startup latency for popular content' },
+                    { heading: 'Configuration Tuning Tips', content: '• Pre-position content based on regional popularity heatmaps\n• Use adaptive bitrate (ABR) ladders with HLS/DASH\n• Peer Open Connect appliances for cache efficiency' }
+                ]
+            },
+            uber: {
+                title: 'Uber: Real-Time Geospatial Driver Dispatch',
+                subtitle: 'H3 hexagonal grid + Ringpop consistent hashing',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph TD\n  A[Driver GPS] --> B[H3 Hex Cell]\n  B --> C[Ringpop Hash Ring]\n  C --> D[Node A]\n  C --> E[Node B]\n  C --> F[Node C]\n  D --> G[In-Memory Driver Index]\n  E --> G\n  F --> G\n  H[Rider Request] --> I[Geospatial Query]\n  I --> J[Nearest H3 Cells]\n  J --> K[Ringpop Lookup]\n  K --> D\n  style B fill:#1e293b,stroke:#f59e0b\n  style C fill:#1e293b,stroke:#2563eb' },
+                    { heading: 'Problem', content: 'Matching millions of drivers to riders every 4 seconds required sub-millisecond 2D spatial lookups across a global fleet.' },
+                    { heading: 'Solution', content: 'Partitioned the earth using H3 Hexagonal Spatial Indexing (16 resolution levels). Used Ringpop (consistent hashing with SWIM gossip protocol) to route driver location updates to the exact node responsible for that H3 hex cell in RAM.' },
+                    { heading: 'Key Metrics', content: '• Sub-millisecond spatial lookups\n• Millions of drivers matched every 4 seconds\n• 6 equal-distance neighbors per hexagon' },
+                    { heading: 'Configuration Tuning Tips', content: '• Use H3 resolution 8–10 for city-level dispatch\n• Ringpop: Set --gossip-interval 100ms for fast convergence\n• Store driver locations in Redis/Memcached per H3 cell' }
+                ]
+            },
+            spanner: {
+                title: 'Google Cloud Spanner: Global Serializability',
+                subtitle: 'TrueTime atomic clocks + Paxos consensus',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph TD\n  A[Client] --> B[Spanner Zone 1]\n  A --> C[Spanner Zone 2]\n  A --> D[Spanner Zone 3]\n  B --> E[TrueTime API]\n  C --> E\n  D --> E\n  B --> F[Paxos Leader]\n  C --> G[Paxos Follower]\n  D --> H[Paxos Follower]\n  E --> I[GPS + Atomic Clocks]\n  style E fill:#1e293b,stroke:#2563eb\n  style F fill:#1e293b,stroke:#10b981' },
+                    { heading: 'Problem', content: 'Achieving globally serializable multi-region transactions without locking database reads worldwide. Traditional 2PC would create unacceptable latency.' },
+                    { heading: 'Solution', content: 'Deployed GPS receivers + Atomic Clocks into data centers (TrueTime API) to bound clock uncertainty (epsilon ≤ 1ms). Enforced a Commit-Wait rule (2*epsilon) so cross-continent reads require zero lock overhead.' },
+                    { heading: 'Key Metrics', content: '• Global serializable transactions\n• Read latency: single-digit ms across continents\n• 2*epsilon commit wait: ~4ms max' },
+                    { heading: 'Configuration Tuning Tips', content: '• Use interleaved tables for parent-child locality\n• Set --max-clock-drift to 50ms for safety margin\n• Partition by geographic region for optimal latency' }
+                ]
+            },
+            whatsapp: {
+                title: 'WhatsApp: 2B Users with Minimal Server Footprint',
+                subtitle: 'Erlang BEAM VM + FreeBSD kernel tuning',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph TD\n  A[User 1] --> B[Erlang BEAM Node]\n  C[User 2] --> B\n  D[User N] --> B\n  B --> E[Lightweight Process 1]\n  B --> F[Lightweight Process 2]\n  B --> G[Lightweight Process N]\n  E --> H[~2KB RAM]\n  F --> H\n  G --> H\n  B --> I[FreeBSD Kernel]\n  style B fill:#1e293b,stroke:#10b981\n  style H fill:#1e293b,stroke:#2563eb' },
+                    { heading: 'Problem', content: 'Maintaining persistent TCP connections for 2 billion active users simultaneously. Traditional OS thread model would require terabytes of RAM.' },
+                    { heading: 'Solution', content: 'Built on Erlang OTP runtime. Erlang lightweight processes consume only ~2KB of RAM per connection (vs. ~1MB OS threads), allowing single servers to hold 2 million+ concurrent open WebSocket/TCP connections.' },
+                    { heading: 'Key Metrics', content: '• 2 billion active users\n• ~2KB RAM per connection\n• 2M+ concurrent connections per server\n• 50 servers handle entire global workload' },
+                    { heading: 'Configuration Tuning Tips', content: '• FreeBSD: Set kern.ipc.soacceptqueue=4096\n• Erlang: +P 134217703 for max processes\n• Use binary matching for efficient protocol parsing' }
+                ]
+            },
+            stripe: {
+                title: 'Stripe: Idempotent Payment Processing Engine',
+                subtitle: 'Idempotency keys + Redis distributed locks',
+                sections: [
+                    { heading: 'Architecture Diagram', type: 'mermaid', content: 'graph LR\n  A[Client] --> B[API Gateway]\n  B --> C[Idempotency Check]\n  C --> D[Redis Lock]\n  D --> E[Immutable Log]\n  E --> F[Payment Processor]\n  F --> G[Bank Gateway]\n  C --> H[Idempotency Cache]\n  style B fill:#1e293b,stroke:#2563eb\n  style C fill:#1e293b,stroke:#8b5cf6\n  style D fill:#1e293b,stroke:#ef4444' },
+                    { heading: 'Problem', content: 'Preventing double-charging customers during network retries or gateway timeouts. A retry could create a duplicate payment.' },
+                    { heading: 'Solution', content: 'Enforces mandatory Idempotency-Key HTTP headers. An API Gateway acquiring a Redis distributed lock checks if the transaction execution payload exists in an immutable log before forwarding requests downstream.' },
+                    { heading: 'Key Metrics', content: '• Zero duplicate charges\n• Idempotency key TTL: 24 hours\n• Redis lock timeout: 5 seconds' },
+                    { heading: 'Configuration Tuning Tips', content: '• Use Redis Redlock for multi-region safety\n• Set Idempotency-Key TTL to 24h for long-running payments\n• Store in both Redis (fast) and PostgreSQL (durable)' }
+                ]
+            }
+        };
+
+        function openDrawer(id) {
+            const data = drawerContent[id];
+            if (!data) return;
+
+            const overlay = document.getElementById('drawerOverlay');
+            const panel = document.getElementById('drawerPanel');
+            const content = document.getElementById('drawerContent');
+
+            let html = '<div class="space-y-4">';
+            html += '<div class="border-b border-slate-800 pb-4">';
+            html += '<h2 class="text-lg font-bold text-white">' + data.title + '</h2>';
+            html += '<p class="text-sm text-slate-400">' + data.subtitle + '</p>';
+            html += '</div>';
+
+            data.sections.forEach(section => {
+                if (section.type === 'mermaid') {
+                    html += '<div class="space-y-2">';
+                    html += '<h3 class="text-sm font-bold text-slate-200">' + section.heading + '</h3>';
+                    html += '<div class="mermaid-container"><pre class="mermaid">' + section.content + '</pre></div>';
+                    html += '</div>';
+                } else {
+                    html += '<div class="space-y-1">';
+                    html += '<h3 class="text-sm font-bold text-slate-200">' + section.heading + '</h3>';
+                    html += '<p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">' + section.content + '</p>';
+                    html += '</div>';
+                }
+            });
+
+            html += '</div>';
+            content.innerHTML = html;
+
+            overlay.classList.add('active');
+            panel.classList.add('open');
+
+            // Re-render mermaid diagrams
+            setTimeout(() => {
+                mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+            }, 100);
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('drawerPanel').classList.remove('open');
+        }
+
+        // ===== BACK-OF-THE-ENVELOPE CALCULATOR =====
+        function runCalculation() {
+            const dau = parseFloat(document.getElementById('calcDau').value) || 0;
+            const actions = parseFloat(document.getElementById('calcActions').value) || 0;
+            const payloadKB = parseFloat(document.getElementById('calcPayload').value) || 0;
+            const readRatio = parseFloat(document.getElementById('calcReadRatio').value) || 80;
+            const peakMultiplier = parseFloat(document.getElementById('calcPeakMultiplier').value) || 2;
+
+            const totalRequestsPerDay = dau * actions;
+            const secondsPerDay = 86400;
+            const avgQps = totalRequestsPerDay / secondsPerDay;
+            const peakQps = avgQps * peakMultiplier;
+            const bandwidthMBps = (avgQps * payloadKB) / 1024;
+            const storagePerDayGB = (totalRequestsPerDay * payloadKB) / (1024 * 1024);
+            const storagePerYearGB = storagePerDayGB * 365;
+            const writeQps = avgQps * (1 - readRatio / 100);
+            const readQps = avgQps * (readRatio / 100);
+
+            const resultsDiv = document.getElementById('calcResults');
+            resultsDiv.classList.remove('hidden');
+
+            document.getElementById('resQps').innerText = '• Average QPS: ' + Math.round(avgQps).toLocaleString() + ' | Peak QPS: ' + Math.round(peakQps).toLocaleString();
+            document.getElementById('resBandwidth').innerText = '• Network Bandwidth: ' + bandwidthMBps.toFixed(2) + ' MB/sec';
+            document.getElementById('resStorage').innerText = '• Raw Data Storage (1 Year): ' + (storagePerYearGB > 1024 ? (storagePerYearGB/1024).toFixed(2) + ' TB' : storagePerYearGB.toFixed(2) + ' GB');
+            document.getElementById('resReadWrite').innerText = '• Read QPS: ' + Math.round(readQps).toLocaleString() + ' | Write QPS: ' + Math.round(writeQps).toLocaleString();
+        }
+
+        // ===== STUDY PROGRESS TRACKER =====
+        const moduleNames = [
+            'Multi-Cloud Equivalence',
+            'Storage Engine Internals',
+            'Schema Evolution & Encoding',
+            'Replication & CRDTs',
+            'Transactions & Isolation',
+            'Consistency & Consensus',
+            'Resiliency & Caching',
+            'RDBMS Scaling',
+            'Messaging & Geospatial',
+            'Batch & Stream Processing',
+            'Scale Estimations',
+            'Rate Limiting & LB',
+            'Architecture Anti-Patterns',
+            'Case Studies',
+            'Failure Matrix'
+        ];
+
+        function getStudyState() {
+            try {
+                const saved = localStorage.getItem('studyProgress');
+                return saved ? JSON.parse(saved) : new Array(moduleNames.length).fill(false);
+            } catch(e) {
+                return new Array(moduleNames.length).fill(false);
+            }
+        }
+
+        function saveStudyState(state) {
+            localStorage.setItem('studyProgress', JSON.stringify(state));
+        }
+
+        function updateProgressUI() {
+            const state = getStudyState();
+            const completed = state.filter(v => v).length;
+            const total = state.length;
+            const pct = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('progressText').textContent = completed + ' / ' + total;
+            document.getElementById('progressFill').style.width = pct + '%';
+
+            // Update checkboxes
+            document.querySelectorAll('.study-checkbox input').forEach((cb, i) => {
+                const moduleIndex = parseInt(cb.closest('.card-item').getAttribute('data-module'));
+                if (!isNaN(moduleIndex) && state[moduleIndex] !== undefined) {
+                    cb.checked = state[moduleIndex];
+                }
+            });
+
+            // Update checklist in sidebar
+            const checklistDiv = document.getElementById('studyChecklist');
+            let html = '';
+            moduleNames.forEach((name, i) => {
+                html += '<label class="flex items-center gap-1.5 cursor-pointer hover:text-slate-300 transition-colors">';
+                html += '<input type="checkbox" ' + (state[i] ? 'checked' : '') + ' onchange="toggleStudyModule(' + i + ')" class="w-3 h-3 accent-blue-600">';
+                html += '<span class="' + (state[i] ? 'text-emerald-400' : '') + '">' + name + '</span>';
+                html += '</label>';
+            });
+            checklistDiv.innerHTML = html;
+        }
+
+        function toggleStudyModule(index) {
+            const state = getStudyState();
+            state[index] = !state[index];
+            saveStudyState(state);
+            updateProgressUI();
+        }
+
+        // Initialize study progress on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressUI();
+        });
+
+        // Also run on page load for browsers that don't fire DOMContentLoaded
+        updateProgressUI();
     </script>
 </body>
 </html>
